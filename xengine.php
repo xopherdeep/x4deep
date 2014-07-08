@@ -2,7 +2,7 @@
 	/**
 	 * Xengine Version 2.x
 	 * @author XopherDeeP <heylisten@xtiv.net>
-	 * @version v2.0.0-beta1.0
+	 * @version v2.0.0
 	**/
 
 	/*
