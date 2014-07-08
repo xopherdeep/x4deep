@@ -2,7 +2,7 @@
 	/**
 	 * Xengine Version 2.x
 	 * @author XopherDeeP <heylisten@xtiv.net>
-	 * @version v2.0.0-beta
+	 * @version v2.0.0-alpha0.1
 	**/
 
 	/*
@@ -185,13 +185,13 @@
 				$this->_SET['params'] = array('','');
 			}
 
+			 
 			// BOOL
 			$this->atSideDoor  = ($this->_SET['params'][0] === $this->_CFG['dir']['sidedoor'] 
 				|| $this->_SET['params'][1] === $this->_CFG['dir']['sidedoor']);	
-
+ 
 			// Back Door - Admin Panel of Pages. 
 			$this->atBackDoor  = ($this->_SET['params'][0] === $this->_CFG['dir']['backdoor']);	// BOOL
-
 
 			$this->atMailBox   = ($this->_SET['params'][0] === $this->_CFG['dir']['bin']);		// BOOL
 			
@@ -509,10 +509,7 @@
 			// Pre Bootstrap...
 			// $layout = ($this->atBackDoor) ? 'backdoor' : 'frontdoor';
 
-			$layout = ($this->atBackDoor) ? 'watchtower' : 'frontdoor';
-
-
-
+			$layout = ($this->atBackDoor) ? 'watchtower' : 'frontdoor'; 
 			$layout = ($this->atSideDoor) ? 'sidedoor' : $layout;
 			
 			// Regardless of Door, if there is a DB error...
@@ -663,7 +660,11 @@
 			$this->smarty->compile_dir  = $dir."/templates_c";
 			$this->smarty->cache_dir    = $dir."/cache";
 			$this->smarty->config_dir   = $dir."/configs";
- 			$this->smarty->template_dir = $this->_CFG['dir']['html'];
+ 			$this->smarty->template_dir =  array(
+ 				$this->_CFG['dir']['html'],
+ 				$this->_CFG['dir']['Xtra']
+ 			);
+
 			$this->smarty->assign($a);			
  
 			
