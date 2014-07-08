@@ -2,7 +2,7 @@
 	/**
 	 * Xengine Version 2.x
 	 * @author XopherDeeP <heylisten@xtiv.net>
-	 * @version v2.0.0-alpha0.1
+	 * @version v2.0.0-beta1.0
 	**/
 
 	/*
@@ -48,25 +48,7 @@
 		var $_debugReport = array();
 
 		function __construct($cfg = false,$parent = false)
-		{
-			define('DOC_ROOT'	,$_SERVER['DOCUMENT_ROOT']);
-		
-			// Glue some configss together
-			$cfg['dir']['cfg']   = DOC_ROOT.'/'.$cfg['dir']['backdoor'].'/'. $cfg['dir']['cfg'];
-			$cfg['dir']['libs']  = $cfg['dir']['backdoor'] . '/' . $cfg['dir']['libs'];
-			$cfg['dir']['Xtra']  = $cfg['dir']['backdoor'] . '/' . $cfg['dir']['Xtra'];
-			$cfg['dir']['html']  = $cfg['dir']['backdoor'] . '/' . $cfg['dir']['html'];
-			
-			
-			define('LIBS_DIR'	,DOC_ROOT.'/'.$cfg['dir']['libs']); 			# Location of the Library Files
-			define('XPHP_DIR'	,DOC_ROOT.'/'.$cfg['dir']['Xtra']); 			# Location of the Xtras Files
-			
-
-			$cfg['dir']['libs'] = LIBS_DIR;
-			// SETUP Xengine based on x.cfg
-			define('BIN'		,DOC_ROOT.'/'.$cfg['dir']['Xtra']); 				# Location of the Bin Files
-			set_include_path(LIBS_DIR);
-
+		{	
 			$this->_comment("Xengine Started!");
 			ini_set('display_errors', $cfg['debug']['on']);
 
@@ -75,10 +57,8 @@
 
 			// We need to be able to write to this directory...
 			if(!is_writeable($cfg['dir']['cfg'])){
-				die($cfg['dir']['cfg']." Not Writable!");
-					
+				die($cfg['dir']['cfg']." Not Writable!"); 
 			}
-
 
 			$this->_CFG   = $cfg;
 			$this->_LANG  = $cfg['lang'] ;
@@ -95,9 +75,14 @@
 			Decide what to do with them. 
 		*/
 		public function knock()
-		{
+		{ 
+			session_start();
 			try {
 				register_shutdown_function(array( &$this, "shutDownFunction" ));
+				
+				$_SESSION['xRan']= 0;
+
+
 
 				$this->keyhole();											// Identify the Whole.
 				$this->openDoor();											// Open the Door a.k.a Execute Mods.
@@ -133,9 +118,7 @@
 		}
 
 		private function keyhole()
-		{
-			session_start();
-
+		{ 
 			// Who Am I?
 			$this->whoAmI();
 			
@@ -223,12 +206,12 @@
 			}
 
 			if ( isset($p[0]) ) {
-				$this->_SET['action']   = ($p[0]) ? $p[0] : 'index';
+				$a = $this->_SET['action']   = ($p[0]) ? $p[0] : 'index';
 				unset($p[0]);
 			}
 
 			if ( isset($p[1]) ) {
-				$this->_SET['method'] = ($p[1]) ? $p[1] : 'index';
+				$m = $this->_SET['method'] = ($p[1]) ? $p[1] : 'index';
 				unset($p[1]);
 			}
 
@@ -272,15 +255,18 @@
 		*/ 
 
 		private function autoRunSniff(){
-			// autoRun the  requisets.
+			// autoRun the  requisets. 
+			$_SESSION['xRan']++;
+			$this->_comment('Xengine started: '.$_SESSION['xRan']);
+
+			
+
 			$this->_comment("Running AutoRun Xtra's");
 			//	$this->dump($this->q());
 			$q = $this->q();
 
 			// ok... we have a db file. but do we have a db!?
 			$this->Q("SHOW TABLES LIKE '".$this->Q->db['prefix']."configs'");
-
-
 
     		if($q->ERROR){
     			// Log the Error to The Trac System!!!!
@@ -322,6 +308,8 @@
 
 				$xphp = $this->getXtras();
 				
+				// $this->dump($xphp); 
+
     			foreach($xphp as $k => $x){
     				try {	    			
 	    				$class = $x['class'];		
@@ -333,16 +321,18 @@
 							$this->_xtra = $class;
 							// $return = $class::autoRun($this);
 
+							
 							$class = new $class($this->_CFG);
+							
 							$class = $this->mergeO($class,$this);
+
 							$return = call_user_func_array(array($class,'autoRun'), array($this));
 
 							$this->_comment('AutoRan '.get_class($class).': ');
-
+ 
 							foreach ($class as $key => $value) {
 								$this->$key = $value;
-							}
-
+							} 
 
 							if(is_array($return)){
 								$this->_SET = $this->set($return);
@@ -440,7 +430,7 @@
 
     			# Kill the Engine send a 404!!
 				$this->_SET['action']   = 'access';
-				$this->_SET['method'] = 'notFound';
+				$this->_SET['method'] = '404';
 				$this->_SET['params']($this->_LANG['404'],$this->_LANG['404_msg']);
     		}
 		}
@@ -571,6 +561,13 @@
 			$lib = $lib[count($lib)-1];
 
 
+
+			$tpl = XPHP_DIR.'/x'.ucfirst($this->_SET['action']).'/'.$this->_SET['method']; 
+			$tpl = ( file_exists($tpl.'.html') ) ? $tpl.'.html' : $tpl.'.tpl' ; 
+			$tpl = ( file_exists($tpl) ) ; 
+		  	$this->set('TPL_EXISTS',$tpl);
+
+
 			// This is our last chance to change the output's HTML template.  
 			$html_door = ($this->atBackDoor) ? $this->_CFG['html']['private'] : $this->_CFG['html']['public'];
 
@@ -582,12 +579,7 @@
 					'method' => 'index'
 				));	 
 
-			}else if(!file_exists($this->_CFG['dir']['html']
-				.'/'.$html_door
-				.'/'.$this->_SET['action']
-				.'/'.$this->_SET['method']
-				.'.html')
-			){
+			}else if(!$tpl){
 				$this->set(array(
 					'action' => 'access',
 					'method' => '404'
@@ -630,9 +622,9 @@
 				'thumb'       => '/'.$this->_CFG['dir']['backdoor'].'/'.$lib.'/phpThumb/phpThumb.php?f=png&q=100&'
 
 			);
-
-			$assign['TPL_EXISTS'] = file_exists(str_replace("//","/",$this->_CFG['dir']['html'].'/'.$assign['Door'].'/'.$this->_SET['action'].'/'.$this->_SET['method'].'.html'));
-
+ 
+			// var_dump($assign['TPL_EXISTS']);
+			// exit;
 			$this->_SET['HTML']['JSAN'] = file_get_contents($this->_CFG['dir']['bin'].'/js/ux/JSAN.js');
 
 			// Initate Smarty and Pass the assigned vars.
@@ -803,46 +795,52 @@
 		function getXTras(){
 			// This is where we should get the control panel icons.
 
+
 			if(!isset($this->_xtras)){
 				// We should only run this once 
 				if ($handle = opendir(XPHP_DIR)) {
 					$time = microtime(true); 
 					$this->_comment("Loading Xtra Files...");
 
+					$files = array();
+
+					// Open the Xtras Directory
 				    while (false !== ($file = readdir($handle))) {
-				        if ($file != "." && $file != "..") {
-				            $ext = explode(".",$file);
+				        if ( substr($file, 0, 1) == 'x' ) {
 
-				            if(strtolower($ext[count($ext)-1]) === 'php'){
-				            	$class = str_replace('.php','',$file);
-				            	
-				            	require_once(XPHP_DIR.'/'.$file);
-				            	//$this->_comment("Loaded Xtra File ".$file);
+				    		$this->_comment("Opening Directory: $file");  
+				        	// Open the PHP File, which should be the same name as the Directory 
+				            
+							$class = $file;
+							$file  = $file.'.php';
 
-				            	$rc = new ReflectionClass($class);
-								$doc = $rc->getDocComment();
+			            	require_once(XPHP_DIR.'/'.$class.'/'.$file);
 
-								if($doc){
-									$data =  trim(preg_replace('/\r?\n *\* */', ' ', $doc));
-									 
-									preg_match_all('/@([a-z]+)\s+(.*?)\s*(?=$|@[a-z]+\s)/s', $data, $matches);
-									$info = array_combine($matches[1], $matches[2]);
+			            	$this->_comment("Loaded Xtra: $class File: $file");
 
-									$ext = explode('.',$file);
-									$jig = array(
-										'author'  => '',
-										'class'   => $ext[0],
-										'file'    => $file,
-										'icon'    => '',
-										'link'    => '',
-										'mini'    => '',
-										'name'    => '',
-										'version' => 0
-									);
+			            	$rc = new ReflectionClass($class);
+							$doc = $rc->getDocComment();
 
-									$files[$file] = array_merge($jig,$info);
-								}
-				            }
+							if($doc){
+								$data =  trim(preg_replace('/\r?\n *\* */', ' ', $doc));
+								 
+								preg_match_all('/@([a-z]+)\s+(.*?)\s*(?=$|@[a-z]+\s)/s', $data, $matches);
+								$info = array_combine($matches[1], $matches[2]);
+
+								$ext = explode('.',$file);
+								$jig = array(
+									'author'  => '',
+									'class'   => $ext[0],
+									'file'    => $file,
+									'icon'    => '',
+									'link'    => '',
+									'mini'    => '',
+									'name'    => '',
+									'version' => 0
+								);
+
+								$files[$file] = array_merge($jig,$info);
+							}
 				        }
 				    }
 				    closedir($handle);
@@ -1122,11 +1120,7 @@
 		// This should be used sparingly, and in production only!
 		public function _comment($msg,$clear=false){
 			$time = round(microtime(true) - $this->_CFG['debug']['runtime'],5); 
-
-
-
-
-			$echo = $this->_debugReport[] = ">'''[wiki:".get_class($this)."]''': ^[~~".$time."~~]^ $msg";
+			$echo = $this->_debugReport[] = ">'''[wiki:".get_class($this)."]''': ^[~~".$time."~~]^ $msg <br/>";
 
 
 
