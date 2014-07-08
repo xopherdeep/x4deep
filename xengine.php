@@ -53,8 +53,10 @@
 		
 			// Glue some configss together
 			$cfg['dir']['cfg']   = DOC_ROOT.'/'.$cfg['dir']['backdoor'].'/'. $cfg['dir']['cfg'];
-			$cfg['dir']['libs']  = $cfg['dir']['backdoor'].'/'. $cfg['dir']['libs'];
-			$cfg['dir']['Xtra']  = $cfg['dir']['backdoor'] + '/' + $cfg['dir']['Xtra'];
+			$cfg['dir']['libs']  = $cfg['dir']['backdoor'] . '/' . $cfg['dir']['libs'];
+			$cfg['dir']['Xtra']  = $cfg['dir']['backdoor'] . '/' . $cfg['dir']['Xtra'];
+			$cfg['dir']['html']  = $cfg['dir']['backdoor'] . '/' . $cfg['dir']['html'];
+			
 			
 			define('LIBS_DIR'	,DOC_ROOT.'/'.$cfg['dir']['libs']); 			# Location of the Library Files
 			define('XPHP_DIR'	,DOC_ROOT.'/'.$cfg['dir']['Xtra']); 			# Location of the Xtras Files
@@ -661,21 +663,13 @@
 			$this->smarty->compile_dir  = $dir."/templates_c";
 			$this->smarty->cache_dir    = $dir."/cache";
 			$this->smarty->config_dir   = $dir."/configs";
-
-
-			
-
- 
-
-			 
-			$this->smarty->template_dir = $this->_CFG['dir']['html'];
+ 			$this->smarty->template_dir = $this->_CFG['dir']['html'];
 			$this->smarty->assign($a);			
-
+ 
 			
-			//
-			// if($this->_CFG['debug']['cache']  == false){
-			// 	$this->smarty->clearAllCache();
-			// }
+			if($this->_CFG['debug']['cache']  == false){
+				$this->smarty->clearAllCache();
+			}
 
 
 			ob_clean();
