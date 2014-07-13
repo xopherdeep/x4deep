@@ -2,7 +2,7 @@
 	/**
 	 * Xengine Version 2.x
 	 * @author XopherDeeP <heylisten@xtiv.net>
-	 * @version v2.0.0
+	 * @version v2.1
 	**/
 
 	/*
@@ -64,8 +64,13 @@
 			$this->_LANG  = $cfg['lang'] ;
 			$this->_BOTS  = $cfg['bots_list'];
 
+			$this->set('suite',$cfg['suite']);
+
 			if(!defined('DB_CFG'))
 				define("DB_CFG", $cfg['dir']['cfg']."/cfg.db.$_SERVER[HTTP_HOST].inc");
+
+
+
 		}
 
 
@@ -89,7 +94,7 @@
 				$this->browse(); 											// Display the Content, HTML, JSON, XML, JPEG.
 				exit;														// EXIT
 			}catch(Exception $e){ 
-				$this->reportSystemError(array(
+				$this->githubIssue(array(
 					'summary'     => 'X ERROR :: '.$e->getMessage(), 
 					'description' => $e->getMessage(),
 					'attr' => array(
@@ -156,8 +161,19 @@
 
 		}
 
+		private function reload($q)
+		{
+			$uri = parse_url($_SERVER['REQUEST_URI']);
+			header("Location: ".$uri['path'].'?'.$q);
+		}
+
 		private function whereAmI()
 		{
+			if( isset($_GET['syncDb']) ){
+				$this->syncDbTables();
+				$this->reload();
+			}
+
 			// This Function Sets all the variables on where the Client IS based on the URL they've Hit.
 			$this->uri         = substr( $_SERVER['REQUEST_URI'], 1 );	// Begins with a / - slice it off.
 			$this->url         = parse_url( $this->uri );				
@@ -175,9 +191,9 @@
  
 			// Back Door - Admin Panel of Pages. 
 			$this->atBackDoor  = ($this->_SET['params'][0] === $this->_CFG['dir']['backdoor']);	// BOOL
+			$this->set('atBackDoor',$this->atBackDoor );
 
 			$this->atMailBox   = ($this->_SET['params'][0] === $this->_CFG['dir']['bin']);		// BOOL
-			
 		}
 
 		public function whatAmI()
@@ -235,6 +251,7 @@
 				// This Xtra configures the Connection to the Database. 
 				$this->_SET['action'] = 'wwwSetup';
 				$this->_SET['method'] = 'install';
+
 				$this->atSideDoor     = true;
 				//$this->dump()
 			} else {		
@@ -294,13 +311,16 @@
 					)
     			);
 
-				$this->reportSystemError($error);
+				$this->githubIssue($error);
 
 				$this->set(array(
 					'action' => 'access',
 					'method' => 'db',
 					'params' => array( $this->uri, $q->ERROR )
 				));
+
+				$this->reload('syncDb');
+
     		}else{
 		    	if(isset($_GET['theme'])){
 		    		$this->STYLE = $_GET['theme'];
@@ -356,7 +376,7 @@
 			$Xtra = 'x'.ucwords($this->_SET['action']);
 
 			$this->_comment("Looking for Class $Xtra");
-			$php  = XPHP_DIR."/$Xtra.php";
+			$php  = XPHP_DIR."/$Xtra/$Xtra.php";
 			$this->_comment("Looking for file $php");
 			if( file_exists($php) ){
 				$this->runXtra($Xtra,$php);
@@ -543,7 +563,7 @@
 					)
     			);
 
-				//$this->reportSystemError($error);
+				//$this->githubIssue($error);
 
 				$layout = 'sidedoor';
 				$this->set(array(
@@ -555,6 +575,8 @@
 						array('sql' => $this->Q->sql)
 					)
 				)); 
+
+				$this->reload('syncDb');
 			}
 
 			$lib = explode('/', $this->_CFG['dir']['libs']);
@@ -578,6 +600,7 @@
 					'action' => 'index',
 					'method' => 'index'
 				));	 
+				
 
 			}else if(!$tpl){
 				$this->set(array(
@@ -859,8 +882,7 @@
 		}
 
 		function syncDbTables(){
-			// Go through all the modules.
-			
+			// Go through all the modules. 
 			$mods = $this->getXTras();
 			foreach($mods as $k => $v){
 				$php = str_replace('.php','',$k);
@@ -870,8 +892,7 @@
 						foreach($db as $table => $columns){
 							if(!empty($columns)){
 								$this->syncTable($table,$columns);
-							}
-							
+							} 
 						}
 					}
 				}
@@ -1099,7 +1120,7 @@
 					)
 				);
 
-				$this->reportSystemError($e);		    	
+				$this->githubIssue($e);		    	
 		    }
 
 		}
@@ -1110,6 +1131,25 @@
 			$r = str_replace($Q->db['prefix'], '', $r);
 			return $r;
 		} 
+
+		/*
+			Accepts an Array of reportable Data. 
+		*/
+		public function githubIssue($error='')
+		{
+
+			
+			$this->lib('Github/AutoLoader.php');
+
+
+
+			Github_Autoloader::register();
+
+			$github = new Github_Client(); 
+
+			
+			$this->dump($github); 
+		}
 
 
 		///////////////////////////// 
