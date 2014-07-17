@@ -70,6 +70,10 @@
 				define("DB_CFG", $cfg['dir']['cfg']."/cfg.db.$_SERVER[HTTP_HOST].inc");
 
 
+			// Installation
+			if(!is_dir($cfg['dir']['libs'])){
+
+			}
 
 		}
 
@@ -672,9 +676,16 @@
 			//ob_clean();
 			
 			# Start the Smarty Class
-			$this->smarty               = new Smarty();	
-			# Configure Smarty			
-			$this->smarty->compile_dir  = $dir."/templates_c";
+			$this->smarty = new Smarty();	
+			
+			# Configure Smarty		 
+			$tmps = $this->_CFG['dir']['cfg']."/__cache";	
+
+			if(!is_dir($tmps)){
+				mkdir($tmps , 0777); 
+			}
+
+			$this->smarty->compile_dir  = $tmps;
 			$this->smarty->cache_dir    = $dir."/cache";
 			$this->smarty->config_dir   = $dir."/configs";
  			$this->smarty->template_dir =  array(
