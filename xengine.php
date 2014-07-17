@@ -625,6 +625,9 @@
 			// $this->dump($lang);
 
 			$assign = array(
+				//
+				'lib_core' 		  => $this->_CFG['lib_core'],
+
 				'Xtra'        => $this->_SET['action'],
 				'method'      => $this->_SET['method'],
 				'params'      => $this->_SET['params'],
@@ -635,13 +638,14 @@
 				'HTTP_HOST'   => $_SERVER['HTTP_HOST'],
 				'html_title'  => $_SERVER['HTTP_HOST'],
 				'USER'        => $_SESSION['user'],
-				'ERROR'       => false, // Set this to Display an Error
+				'ERROR'       => false, // Set this to Display an Errord
 				
 				// Sets the template variable TPL_EXISTS to make sure we have the page
 				'LANG'        => $lang ,
 				
 				// KEY
 				'masterKey' => $this->Key,
+
 
 				// Depreciate
 				'IS_ADMIN'    => $this->_LANG,
