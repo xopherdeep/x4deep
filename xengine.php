@@ -191,15 +191,17 @@
 			 
 			// BOOL
 			$this->atSideDoor  = ($this->_SET['params'][0] === $this->_CFG['dir']['sidedoor'] 
-				|| $this->_SET['params'][1] === $this->_CFG['dir']['sidedoor']);	
+				|| $this->_SET['params'][1] === $this->_CFG['dir']['sidedoor']);	 
 
-
- 
 			// Back Door - Admin Panel of Pages. 
 			$this->atBackDoor  = ($this->_SET['params'][0] === $this->_CFG['dir']['backdoor']);	// BOOL
-			$this->set('atBackDoor',$this->atBackDoor );
+			$this->atGodDoor   = ($this->_SET['params'][0] === $this->_CFG['dir']['goddoor']);	// BOOL
+			
+			$this->atFrontDoor = ($this->atGodDoor || $this->atBackDoor || $this->atSideDoor ) ? false : true;
+			$this->atMailBox   = ($this->_SET['params'][0] === $this->_CFG['dir']['bin']);		// BOOL 
 
-			$this->atMailBox   = ($this->_SET['params'][0] === $this->_CFG['dir']['bin']);		// BOOL
+
+			$this->set('atBackDoor',$this->atBackDoor );
 		}
 
 		public function whatAmI()
@@ -217,15 +219,19 @@
 			$this->_SET['action'] = $this->_SET['method'] = 'index';
 
 			// If we are at the back door, remove it out of our params.
-			if ($this->atBackDoor) {
+			
+
+			// First check to see which door we're at.
+			if ($this->atBackDoor || $this->atGodDoor) {
 				unset($p[0]);
 				$p = array_values($p);
-			}
+			} 
 
+			// Now check the side door.
 			if ($this->atSideDoor) {
 				unset($p[0]);
 				$p = array_values($p);
-			}
+			} 
 
 			if ( isset($p[0]) ) {
 				$a = $this->_SET['action']   = ($p[0]) ? $p[0] : 'index';
@@ -528,14 +534,11 @@
 			$layout = ($this->atBackDoor) ? 'watchtower' : 'frontdoor'; 
 			$layout = ($this->atSideDoor) ? 'sidedoor' : $layout;
 			
-			// Regardless of Door, if there is a DB error...
-			// @TODO This Could be caught earlier... though
+			$layout = ($this->atGodDoor) ?  'iframe' : $layout;	
+				if($this->Key['is']['admin'] == true){
+			}
 
-			// $this->dump($this->lang( 
-			// 	$this->_LANG['DB']['ERROR']['SQL'],
-			// 	array('sql' => $this->Q->mSql)
-			// ));
-
+ 
 			// DATABASE ERROR
 			if(false !== $this->Q->ERROR && file_exists(DB_CFG)){
 				// function removeLocalData($r,$Q)
