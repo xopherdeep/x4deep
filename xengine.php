@@ -2,7 +2,7 @@
 	/**
 	 * Xengine Version 2.x
 	 * @author XopherDeeP <heylisten@xtiv.net>
-	 * @version v2.1.1
+	 * @version v2.1.2
 	**/
 
 	/*
@@ -65,6 +65,8 @@
 			$this->_BOTS  = $cfg['bots_list'];
 
 			$this->set('suite',$cfg['suite']);
+
+			$this->set('_cfg',$cfg); 
 
 			if(!defined('DB_CFG'))
 				define("DB_CFG", $cfg['dir']['cfg']."/cfg.db.$_SERVER[HTTP_HOST].inc");
@@ -663,6 +665,8 @@
 			// var_dump($assign['TPL_EXISTS']);
 			// exit;
 			$this->_SET['HTML']['JSAN'] = file_get_contents($this->_CFG['dir']['bin'].'/js/ux/JSAN.js');
+
+
 
 			// Initate Smarty and Pass the assigned vars.
 			$this->initSmarty(array_merge($assign, $this->_SET));
