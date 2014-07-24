@@ -2,7 +2,7 @@
 	/**
 	 * Xengine Version 2.x
 	 * @author XopherDeeP <heylisten@xtiv.net>
-	 * @version v2.1
+	 * @version v2.1.1
 	**/
 
 	/*
@@ -637,7 +637,8 @@
 				'Door'        => $html_door,
 				'toBackDoor'  => $this->_CFG['dir']['backdoor'],
 				'toFrontDoor' => $this->_CFG['dir']['frontdoor'],
-				'toSideDoor'  => $this->_CFG['dir']['sidedoor'],
+				'toSideDoor'  => $this->_CFG['dir']['sidedoor'], 
+				'toGodDoor'  => $this->_CFG['dir']['goddoor'],
 				'HTTP_HOST'   => $_SERVER['HTTP_HOST'],
 				'html_title'  => $_SERVER['HTTP_HOST'],
 				'USER'        => $_SESSION['user'],
