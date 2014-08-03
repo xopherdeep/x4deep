@@ -2,7 +2,7 @@
 	/**
 	 * Xengine Version 2.x
 	 * @author XopherDeeP <heylisten@xtiv.net>
-	 * @version v2.1.2
+	 * @version v2.1.3
 	**/
 
 	/*
@@ -353,8 +353,7 @@
 							$this->_comment("Auto Run: ". $class);	
 							
 							$this->_xtra = $class;
-							// $return = $class::autoRun($this);
-
+							// $return = $class::autoRun($this); 
 							
 							$class = new $class($this->_CFG);
 							
@@ -368,9 +367,10 @@
 								$this->$key = $value;
 							} 
 
-							if(is_array($return)){
+							if(is_array($return)){ 
 								$this->_SET = $this->set($return);
 								$this->_SET = array_merge($return,$this->_SET);
+
 							}
 
 
@@ -434,8 +434,10 @@
     		 
 				$return = call_user_func_array( array($Xtra,$this->_SET['method']), $this->_SET['params'] );
 
-
 				$this->_SET = $this->apply($this->_SET,$Xtra->_SET); 
+
+				// var_dump($return);
+				// exit;
 				
 				if(is_array($return))
 					$this->_SET = array_merge($return,$this->_SET);
@@ -510,10 +512,42 @@
 
 					case 'json': 
 						ob_clean();	
-						unset($array['HTML']);
-						unset($array['ICON']);
-						unset($array['admin_menu']);
-						unset($array['xtras']);
+
+						$whitelist = array('success','data','header');
+
+						foreach ($array as $key => $value) {
+							$unset = true;
+							foreach ($whitelist as $k => $w) {
+								if($key == $w)
+									$unset = false;
+							}
+							if($unset){
+								unset($array[$key]);
+							} 
+						}
+
+
+						// unset($array['HTML']);
+						// unset($array['ICON']);
+						// unset($array['admin_menu']);
+						// unset($array['xtras']);
+						// unset($array['_LANG']);
+						// unset($array['_cfg']);
+						// unset($array['qBlox']);
+						// unset($array['user']);
+						// unset($array['SVR']);
+						// unset($array['navi']);
+						// unset($array['deku']);
+						// unset($array['SUPER_ADMIN']);
+						
+						// foreach ($array['CONFIG'] as $key => $value) {
+						// 	unset($array[$key]);
+						// }
+
+						// unset($array['CONFIG']);
+
+
+
 						header('Content-type: text/javascript');
 		    			echo json_encode($array);
 					break;
