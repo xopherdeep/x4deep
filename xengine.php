@@ -2,7 +2,7 @@
 	/**
 	 * Xengine Version 2.x
 	 * @author XopherDeeP <heylisten@xtiv.net>
-	 * @version v2.1.3
+	 * @version v2.1.4
 	**/
 
 	/*
@@ -123,6 +123,7 @@
 						'method' => $this->_SET['method']
 					)
 				));
+
 				//$this->dump($this->_SET);
 				$this->browse(); 
 			}
@@ -462,12 +463,26 @@
     		}else{
 
     			// Test to see if Navi knows where to go.
-
-
+    			
+    // 			$this->set(array(
+				// 	'action' => 'access',
+				// 	'method' => 'error',
+				// 	'params' => array(
+				// 		'error' => $e->getMessage()
+				// 	),
+				// 	'request' => array(
+				// 		'action' => $this->_SET['action'],
+				// 		'method' => $this->_SET['method']
+				// 	)
+				// ));
     			# Kill the Engine send a 404!!
 				$this->_SET['action']   = 'access';
 				$this->_SET['method'] = '404';
-				$this->_SET['params']($this->_LANG['404'],$this->_LANG['404_msg']);
+				$this->_SET['params'] = array($this->_LANG['404'],$this->_LANG['404_msg']);
+
+				# We might have logged in...
+    			$this->whoAmI($this->Key);
+    			$this->whatAmI($this->Key);
     		}
 		}
 
@@ -513,7 +528,7 @@
 					case 'json': 
 						ob_clean();	
 
-						$whitelist = array('success','data','header');
+						$whitelist = array('success','data','header','version');
 
 						foreach ($array as $key => $value) {
 							$unset = true;
@@ -660,13 +675,17 @@
 				$lang = array_merge_recursive($this->_LANG,$this->_SET['_LANG']); 
 			}
 
+			// $rc = new ReflectionClass($class);
+			// $doc = $rc->getDocComment();
+			// $info = $this->readPhpComment($doc);
+
 
 			// $this->dump($lang);
 
 			$assign = array(
-				//
+				//f
 				'lib_core' 		  => $this->_CFG['lib_core'],
-
+				// 'version' =>'4',
 				'Xtra'        => $this->_SET['action'],
 				'method'      => $this->_SET['method'],
 				'params'      => $this->_SET['params'],
