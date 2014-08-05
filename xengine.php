@@ -2,25 +2,17 @@
 	/**
 	 * Xengine Version 2.x
 	 * @author XopherDeeP <heylisten@xtiv.net>
-	 * @version v2.1.4
+	 * @version v2.1.5
 	**/
 
 	/*
-	  Xengine Version 2 address the fact that Xtras and HTML files are stored in their own containing Directory.
-	  v1 split the Xtras into x/xtra and html files into html/frontdoor & html/backdoor
-	  v2 now splits the xtrans into x/_suite_/_xTra_/
-	    where xTra contains all php and html/tpl files, along with css & js files.
+	  The Artistic License 2.0
 
-	*/
+           Copyright (c) 2014 MidKnight Knerd
 
-
-	# Xengine is Small and PowerFull; Hook into it using Xtras. The Xengine Idea is: Drop and Build!
-	# It setups an easy to use connection between Clean URLs and PHP Classes
-	# The eXtend PHP Classes with Xengine allowing Easy Access to the the DB using $q = $this->q(); 
-	# The DB doesn't connect until the function is called, once connected, it can be accessed via $this->Q
-	# The CleanURL Structure is as Follows: domain.com/class/method/param1/param2/param3/etc
-	# where class is the class name found in the Xtra's. ex: xClass.php, the method should be found there.
-	# If there is an HTML page to render with the method, the files go in the html dir, 
+     Everyone is permitted to copy and distribute verbatim copies
+      of this license document, but changing it is not allowed.
+	*/ 
 
 	class Xengine
 	{
@@ -528,17 +520,24 @@
 					case 'json': 
 						ob_clean();	
 
-						$whitelist = array('success','data','header','version');
+						$whitelist = array('success','data','header','version','error');
+
+						$u = parse_url($_SERVER['REQUEST_URI']);
+						parse_str($u['query'],$_GET);
 
 						foreach ($array as $key => $value) {
 							$unset = true;
 							foreach ($whitelist as $k => $w) {
-								if($key == $w)
+								if($key == $w || isset($_GET[$key]) )
 									$unset = false;
 							}
+
+
+
 							if($unset){
 								unset($array[$key]);
 							} 
+							
 						}
 
 
