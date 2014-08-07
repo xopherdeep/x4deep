@@ -2,7 +2,7 @@
 	/**
 	 * Xengine Version 2.x
 	 * @author XopherDeeP <heylisten@xtiv.net>
-	 * @version v2.1.5.7
+	 * @version v2.2.0
 	**/
 
 	/*
@@ -468,8 +468,11 @@
 				// 	)
 				// ));
     			# Kill the Engine send a 404!!
-				$this->_SET['action']   = 'access';
+
+    			$this->_SET['anchor'] = $this->_SET['action'];
+				$this->_SET['action'] = 'access';
 				$this->_SET['method'] = '404';
+
 				$this->_SET['params'] = array($this->_LANG['404'],$this->_LANG['404_msg']);
 
 				# We might have logged in...
@@ -664,7 +667,8 @@
 			}else if(!$tpl){
 				$this->set(array(
 					'action' => 'access',
-					'method' => '404'
+					'method' => '404',
+					'anchor' => $this->_SET['action']
 				));				
 				//$this->_SET['HTML']['HEAD']['TITLE'] = "Page Template Not Found";
 			}
@@ -673,18 +677,12 @@
 			if(is_array($this->_SET['_LANG'])){
 				$lang = array_merge_recursive($this->_LANG,$this->_SET['_LANG']); 
 			}
-
-			// $rc = new ReflectionClass($class);
-			// $doc = $rc->getDocComment();
-			// $info = $this->readPhpComment($doc);
-
-
-			// $this->dump($lang);
+ 
 
 			$assign = array(
 				//f
-				'lib_core' 		  => $this->_CFG['lib_core'],
-				// 'version' =>'4',
+				'lib_core'    => $this->_CFG['lib_core'],
+				// 'version'  =>'4',
 				'Xtra'        => $this->_SET['action'],
 				'method'      => $this->_SET['method'],
 				'params'      => $this->_SET['params'],
@@ -692,7 +690,7 @@
 				'toBackDoor'  => $this->_CFG['dir']['backdoor'],
 				'toFrontDoor' => $this->_CFG['dir']['frontdoor'],
 				'toSideDoor'  => $this->_CFG['dir']['sidedoor'], 
-				'toGodDoor'  => $this->_CFG['dir']['goddoor'],
+				'toGodDoor'   => $this->_CFG['dir']['goddoor'],
 				'HTTP_HOST'   => $_SERVER['HTTP_HOST'],
 				'html_title'  => $_SERVER['HTTP_HOST'],
 				'USER'        => $_SESSION['user'],
@@ -702,16 +700,16 @@
 				'LANG'        => $lang ,
 				
 				// KEY
-				'masterKey' => $this->Key,
-
-
+				'masterKey'   => $this->Key,
+				
+				
 				// Depreciate
 				'IS_ADMIN'    => $this->_LANG,
 				'blox'        => false,
 				'LAYOUT'      => $layout,
 				'LAYOUTS'     =>  $this->_CFG['html'],
-				'thumb'       => '/'.$this->_CFG['dir']['backdoor'].'/'.$lib.'/phpThumb/phpThumb.php?f=png&q=100&'
-
+				'thumb'       => '/'.$this->_CFG['dir']['backdoor'].'/'.$lib.'/phpThumb/phpThumb.php?f=png&q=100&',
+				'URL'         => parse_url($_SERVER['REQUEST_URI'])
 			);
 			 
 			// var_dump($assign['TPL_EXISTS']);
