@@ -2,7 +2,7 @@
 	/**
 	 * Xengine Version 2.x
 	 * @author XopherDeeP <heylisten@xtiv.net>
-	 * @version v2.2.0
+	 * @version v2.2.1
 	**/
 	
 
@@ -416,7 +416,10 @@
 			$Xtra = $this->mergeO($Xtra,$this);
 
 			# if the method exists...
-			if( method_exists($Xtra,$this->_SET['method']) && $this->is_class_method('public',$this->_SET['method'],$Xtra) )
+			$public   = (method_exists($Xtra,$this->_SET['method']) && $this->is_class_method('public', $this->_SET['method'], $Xtra));
+			$security = ($this->Key['is']['admin']) ? method_exists($Xtra,$this->_SET['method']) : $public;
+
+			if( $security )
 			{
 				// $Xtra->Q = $this->Q;
     			# call the function w/ params
