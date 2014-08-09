@@ -2,7 +2,7 @@
 	/**
 	 * Xengine Version 2.x
 	 * @author XopherDeeP <heylisten@xtiv.net>
-	 * @version v2.2.1
+	 * @version v2.2.2
 	**/
 	
 
@@ -63,6 +63,9 @@
 
 			if(!defined('DB_CFG'))
 				define("DB_CFG", $cfg['dir']['cfg']."/cfg.db.$_SERVER[HTTP_HOST].inc");
+
+			if(!defined('SVR_FILES'))
+				define("SVR_FILES", CFG_DIR."/$_SERVER[HTTP_HOST]");
 
 
 			// Installation
