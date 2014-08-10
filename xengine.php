@@ -2,10 +2,9 @@
 	/**
 	 * Xengine Version 2.x
 	 * @author XopherDeeP <heylisten@xtiv.net>
-	 * @version v2.2.2
+	 * @version v2.2.3
 	**/
 	
-
 	/*
 	  The Artistic License 2.0
 
@@ -67,6 +66,8 @@
 			if(!defined('SVR_FILES'))
 				define("SVR_FILES", CFG_DIR."/$_SERVER[HTTP_HOST]");
 
+			if(!defined('HTTP_HOST'))
+				define("HTTP_HOST", $_SERVER['HTTP_HOST']);
 
 			// Installation
 			if(!is_dir($cfg['dir']['libs'])){
@@ -530,10 +531,11 @@
 					case 'json': 
 						ob_clean();	
 
-						$whitelist = array('success','data','header','version','error');
-
+						$whitelist = array('success','data','header','version','error','recordsTotal','draw','recordsFiltered');
+ 
 						$u = parse_url($_SERVER['REQUEST_URI']);
-						parse_str($u['query'],$_GET);
+
+						//parse_str($u['query'],$G);
 
 						foreach ($array as $key => $value) {
 							$unset = true;
