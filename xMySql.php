@@ -265,7 +265,7 @@ if(!class_exists('xMySql')){
 	                $needle .= ($needle) ? " $aor $where " : " WHERE $where "; 
 	            }	
             }else if(is_string($haystack)){
-            	$needle = "WHERE $haystack";
+            	$needle = " WHERE $haystack ";
             }
             return $needle;
         }
