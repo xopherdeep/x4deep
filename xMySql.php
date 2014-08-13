@@ -7,8 +7,7 @@
  * 
  * @author Xopher Pollard
  * @email heylisten@xtiv.net
- * @version v1.1.0
- * @data 7/01/2014s
+ * @version v1.1.1
  */
 
 if(!class_exists('xMySql')){
