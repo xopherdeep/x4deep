@@ -2,7 +2,7 @@
 	/**
 	 * Xengine Version 2.x
 	 * @author XopherDeeP <heylisten@xtiv.net>
-	 * @version v2.2.3
+	 * @version v2.2.4
 	**/
 	
 	/*
@@ -168,7 +168,7 @@
 		private function reload($q)
 		{
 			$uri = parse_url($_SERVER['REQUEST_URI']);
-			header("Location: ".$uri['path'].'?'.$q);
+			header("Location: ".$uri['path'].'&'.$q);
 		}
 
 		private function whereAmI()
@@ -531,7 +531,7 @@
 					case 'json': 
 						ob_clean();	
 
-						$whitelist = array('success','data','header','version','error','recordsTotal','draw','recordsFiltered');
+						$whitelist = array('success','data','header','version','error','recordsTotal','draw','recordsFiltered','id');
  
 						$u = parse_url($_SERVER['REQUEST_URI']);
 
@@ -647,7 +647,7 @@
 					)
 				)); 
 
-				$this->reload('syncDb');
+				//$this->reload('syncDb');
 			}
 
 			$lib = explode('/', $this->_CFG['dir']['libs']);

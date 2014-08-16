@@ -7,7 +7,7 @@
  * 
  * @author Xopher Pollard
  * @email heylisten@xtiv.net
- * @version v1.1.1
+ * @version v1.1.2
  */
 
 if(!class_exists('xMySql')){
@@ -147,6 +147,16 @@ if(!class_exists('xMySql')){
     		$num = $this->Q($sql);
     		return $num[0]["Count('id')"];
     	}	
+
+
+        function CountQ($sql){
+            $sql = "SELECT Count('*') FROM ($sql) as count_t";
+            // if($needle){
+            //     $sql .= $this->Where($needle,$o,$aor);
+            // }
+            $num = $this->Q($sql);
+            return $num[0]["Count('*')"];
+        }   
     
     	/**
     	 * @desc Selects row(s) of data. returns an associative array.
@@ -163,11 +173,11 @@ if(!class_exists('xMySql')){
             // check to make sure the table exists. 
             $tables = $this->ListTables();
 
-            if($tables != null){
+            if($tables != null && !is_array($from)){
             	if(!in_array( $this->PREFIX.$from, array_keys($tables)))
             		return false;
             }else{
-            //	return false;
+                //	return false;
             }
             
             
@@ -175,7 +185,7 @@ if(!class_exists('xMySql')){
 
 
     		if(is_array($data)){
-	    		$f = " FROM ";
+	    		
 	    		foreach($data as  $c => $t){
 	    			foreach($t as $k => $v){
 		    			if(!is_int($k)){
@@ -191,21 +201,24 @@ if(!class_exists('xMySql')){
 	    				$f .= " $c ";
 	    			}*/
 	    		}
+                $data = $select;
 
-	    		if(is_array($from)){
-	    			 $find = key($from);
-	    				next($from);
-	    			 $link = key($from);
-	    			
-	    			$f .= "$this->PREFIX$find $join JOIN $this->PREFIX$link ON $this->PREFIX$link.$from[$link] = $this->PREFIX$find.$from[$find]";
-	    		}else{
-	    			$f .= " $c ";
-	    		}
-	    		
-	    		$select .= $f;
-    		}else{
-    			$select = " $data FROM $this->PREFIX$from ";
     		}
+
+            $f = " FROM ";
+
+            if(is_array($from)){
+                 $find = key($from);
+                    next($from);
+                 $link = key($from);
+                
+                $f .= "$this->PREFIX$find $join JOIN $this->PREFIX$link ON $this->PREFIX$link.$from[$link] = $this->PREFIX$find.$from[$find]";
+            }else{
+                $f .= "$this->PREFIX$from ";
+            }
+            
+            $select = $data.$f;
+
     		
     		$sql = "SELECT $select ";
     		
@@ -229,7 +242,7 @@ if(!class_exists('xMySql')){
 			}
     		
 			// Counts All Records
-    		$this->mCountAll = $this->Count($from,$needle);
+    		//$this->mCountAll = $this->CountQ($sql);
     		
     		return $this->Q($sql);
     	}
@@ -257,9 +270,11 @@ if(!class_exists('xMySql')){
 	            	
 	            	
 	            	$v = mysql_real_escape_string($v);
-	                $v = ($o == "LIKE" || $o == "NOT LIKE") ? "'%$v%'" : "'$v'";
 	                
-	                $where = ($v == "'null'") ? "$c IS NULL" : "$c $o $v"; 
+                    if(!is_numeric($v))
+                         $v = ($o == "LIKE" || $o == "NOT LIKE") ? "'%$v%'" : "'$v'";    
+
+	                $where = ($v == "null") ? "$c IS NULL" : "$c $o $v"; 
 	                
 	                $needle .= ($needle) ? " $aor $where " : " WHERE $where "; 
 	            }	
