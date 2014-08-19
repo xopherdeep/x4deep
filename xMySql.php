@@ -7,7 +7,7 @@
  * 
  * @author Xopher Pollard
  * @email heylisten@xtiv.net
- * @version v1.1.2
+ * @version v1.1.3
  */
 
 if(!class_exists('xMySql')){
@@ -279,7 +279,8 @@ if(!class_exists('xMySql')){
 	                $needle .= ($needle) ? " $aor $where " : " WHERE $where "; 
 	            }	
             }else if(is_string($haystack)){
-            	$needle = " WHERE $haystack ";
+                $haystack = str_replace('WHERE', '', $haystack);
+            	$needle = "WHERE $haystack ";
             }
             return $needle;
         }

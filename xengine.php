@@ -965,7 +965,8 @@
 			
 			return $files;
 		}
-// check this out
+
+		
 		function readPhpComment($doc) 
 		{
 			$data =  trim(preg_replace('/\r?\n *\* */', ' ', $doc)); 
