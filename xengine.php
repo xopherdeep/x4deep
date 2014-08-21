@@ -2,7 +2,7 @@
 	/**
 	 * Xengine Version 2.x
 	 * @author XopherDeeP <heylisten@xtiv.net>
-	 * @version v2.2.4
+	 * @version v2.2.5
 	**/
 	
 	/*
@@ -978,9 +978,11 @@
 		function syncDbTables(){
 			// Go through all the modules. 
 			$mods = $this->getXTras();
+			$this->_comment(count($mods)." mods");
 			foreach($mods as $k => $v){
 				$php = str_replace('.php','',$k);
 				if( method_exists($php,'dbSync') ){
+					$this->_comment(" <hr/> DB: Syncing $php");
 					$db = $php::dbSync();
 					if(!empty($db)){
 						foreach($db as $table => $columns){
@@ -1018,23 +1020,37 @@
 
 			$c = $q->Q("SHOW TABLES LIKE '$q->PREFIX$table'");
 
+			$this->_comment("Syncing Table: $table");
+
 			if(!empty($c)){
 				$c = $q->Q("DESC $q->PREFIX$table");
 			}
 
 			if(!empty($c) && is_array($columns)){
+				$this->_comment('<fieldset><legend>'.$table.'</legend> ');
+				 
 				foreach($c as $k => $v){
 					$col = $v['Field'];
+					
+
 					// Check Columns
 					if( isset( $columns[$col] ) ){
-						// Column Doesn't Match
-						if(is_array($columns[$col])){
-							if($columns[$col]['Type'] != $v['Type'] || (isset($columns[$col]['Default']) && $v['Default'] != $columns[$col]['Default'])  ){
+						$this->dump($columns[$col],true,false); 
+
+						if(is_array($columns[$col])){ 
+								
+
+							// Column Doesn't Match
+							if(strtolower($columns[$col]['Type']) != strtolower($v['Type']) || (isset($columns[$col]['Default']) && $v['Default'] != $columns[$col]['Default'])  ){
+							
+								
 								// Add Sync to Sql
 								$sync = "`$v[Field]` `$v[Field]` ".$columns[$col]['Type'];
 
 								if(isset($columns[$col]['Default'])){
-									$sync .= ' DEFAULT "'.$columns[$col]['Default'].'"';
+									$default = $columns[$col]['Default'];
+									$default = ($default == 'CURRENT_TIMESTAMP') ? $default : "'$default'";
+									$sync .= " DEFAULT $default ";
 								}
 
 
@@ -1047,7 +1063,9 @@
 						unset( $columns[$col] );
 						unset( $c[$k] );
 					}
-				}
+					$this->dump($v,true,false);  
+					$this->_comment('<hr/>');
+				}	
 
 				// Change Columns
 				if($sql){
@@ -1057,22 +1075,22 @@
 						//echo $q->mSql.'<hr>';
 						//echo $q->error;
 					}
-					return $q->error;
+					$this->_comment('Changing Column: '.$q->mSql);
+					// return $q->error;
+					
 				}
-
+				$this->_comment(" ");
+				$this->_comment('</table></fieldset>');
 				// New columns
 				if(!empty($columns)){
 					foreach($columns as $k => $v){
 						if(is_array($v)){
 							$sync = "`$k` ".$v['Type'];
 							$q->Q("ALTER TABLE `$q->PREFIX$table` ADD $sync");
-						}
-						//echo $q->error;
+							$this->_comment('New Column: '.$q->mSql);
+						} 
 					}
-
-				}
-
-
+				} 
 			}else{
 
 				if( is_array($columns) ){
@@ -1087,6 +1105,7 @@
 					// echo $q->error;
 				}else{
 				# Rename Table...
+					
 					$chk = $q->Q("SHOW TABLES LIKE '$table'");
 
 					if(empty($chk)){
@@ -1098,9 +1117,10 @@
 					}else{
 						$q->Q("RENAME TABLE $table TO $q->PREFIX$columns");
 					}
-
+					$this->_comment('Renable Table: '.$table.' '.$q->mSql);
 				}
 			}
+
 		}
 
 		function mainDomain(){

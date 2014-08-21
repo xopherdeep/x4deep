@@ -7,7 +7,7 @@
  * 
  * @author Xopher Pollard
  * @email heylisten@xtiv.net
- * @version v1.1.3
+ * @version v1.1.4
  */
 
 if(!class_exists('xMySql')){
@@ -95,6 +95,7 @@ if(!class_exists('xMySql')){
     		// MySQL Success	
     			default:
     				$this->mCount       = mysql_num_rows($r);
+                    $this->mCountAll    = $this->mCount;
 		    		$this->mData = null;
 		    		while ($row = mysql_fetch_array($r, MYSQL_ASSOC)) {
 					    $this->mData[] = $row;
