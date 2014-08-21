@@ -531,7 +531,8 @@
 					case 'json': 
 						ob_clean();	
 
-						$whitelist = array('success','data','header','version','error','recordsTotal','draw','recordsFiltered','id');
+						$whitelist = array(
+							'success','data','header','version','error','recordsTotal','draw','recordsFiltered','id','msg');
  
 						$u = parse_url($_SERVER['REQUEST_URI']);
 
