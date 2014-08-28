@@ -2,7 +2,7 @@
 	/**
 	 * Xengine Version 2.x
 	 * @author XopherDeeP <heylisten@xtiv.net>
-	 * @version v2.2.5
+	 * @version v2.2.6
 	**/
 	
 	/*
@@ -1502,7 +1502,7 @@
 			return $this->RPC = $c;
 		}
 
-		function is_email($email, $checkDNS = false) {
+		function is_emai($email, $checkDNS = false) {
 	        //      Check that $email is a valid address
 	        //              (http://tools.ietf.org/html/rfc3696)
 	        //              (http://tools.ietf.org/html/rfc2822)
