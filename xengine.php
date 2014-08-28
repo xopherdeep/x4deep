@@ -429,10 +429,8 @@
     			# call the function w/ params
     			$this->_comment("Running $php");	
 
-    			array_values($this->_SET['params']);
+    			array_values($this->_SET['params']); 
 
-
-    		 
 				$return = call_user_func_array( array($Xtra,$this->_SET['method']), $this->_SET['params'] );
 
 				$this->_SET = $this->apply($this->_SET,$Xtra->_SET); 
@@ -462,9 +460,13 @@
 			# Illegal Method has been Called!
     		}else{
 
+    			$this->_SET['not_found'] = array(
+    				'action' => $this->_SET['action'],
+    				'method' => $this->_SET['method']
+    			);
     			// Test to see if Navi knows where to go.
     			
-    // 			$this->set(array(
+    			// $this->set(array(
 				// 	'action' => 'access',
 				// 	'method' => 'error',
 				// 	'params' => array(
@@ -477,12 +479,15 @@
 				// ));
     			# Kill the Engine send a 404!!
 
+    			$this->lookForFile();
+
     			$this->_SET['anchor'] = $this->_SET['action'];
 				$this->_SET['action'] = 'access';
 				$this->_SET['method'] = '404';
 
 				$this->_SET['params'] = array($this->_LANG['404'],$this->_LANG['404_msg']);
 
+				
 				# We might have logged in...
     			$this->whoAmI($this->Key);
     			$this->whatAmI($this->Key);
@@ -528,8 +533,9 @@
 						$this->viewTemplate();
 					break;
 
-					case 'json': 
+					case 'json':  
 						ob_clean();	
+						$this->lookForFile();
 
 						$whitelist = array(
 							'success','data','header','version','error','recordsTotal','draw','recordsFiltered','id','msg');
@@ -599,7 +605,8 @@
 			
 			$layout = ($this->atGodDoor) ?  'iframe' : $layout;	
 				if($this->Key['is']['admin'] == true){
-			}
+
+				}
 
  
 			// DATABASE ERROR
@@ -656,10 +663,23 @@
 
 
 
-			$tpl = XPHP_DIR.'/x'.ucfirst($this->_SET['action']).'/'.$this->_SET['method']; 
-			$tpl = ( file_exists($tpl.'.html') ) ? $tpl.'.html' : $tpl.'.tpl' ; 
-			$tpl = ( file_exists($tpl) ) ; 
-		  	$this->set('TPL_EXISTS',$tpl);
+			
+			$t = $this->getXTras();
+			
+			foreach($t as $x => $a){ 
+				if(lcfirst(str_replace('.php', '', substr($x, 1))) == $this->_SET['action'])
+					$php = $a;
+			}
+
+
+
+			$x_tmp = XPHP_DIR.'/'.$php['class'].'/';
+			
+			$tpl = $x_tmp.$this->_SET['method'].'.tpl'; 
+			// $tpl = ( file_exists($tpl.'.html') ) ? $tpl.'.html' : $tpl.'.tpl' ; 
+			
+ 
+		  	$this->set('TPL_EXISTS', file_exists($tpl) );
 
 
 			// This is our last chance to change the output's HTML template.  
@@ -674,12 +694,21 @@
 				));	 
 				
 
-			}else if(!$tpl){
+			}else if(!file_exists($tpl)){
+				// This could be somewhere ... 
+
 				$this->set(array(
 					'action' => 'access',
 					'method' => '404',
-					'anchor' => $this->_SET['action']
+					'anchor' => $this->_SET['action'],
+					'tpl'	=> $tpl,
+					'not_found'	=> array(
+						'action' => $this->_SET['action'],
+						'method' => $this->_SET['method']
+					) 
 				));				
+
+				$this->lookForFile();
 				//$this->_SET['HTML']['HEAD']['TITLE'] = "Page Template Not Found";
 			}
 
@@ -719,17 +748,41 @@
 				'LAYOUT'      => $layout,
 				'LAYOUTS'     =>  $this->_CFG['html'],
 				'thumb'       => '/'.$this->_CFG['dir']['backdoor'].'/'.$lib.'/phpThumb/phpThumb.php?f=png&q=100&',
-				'URL'         => parse_url($_SERVER['REQUEST_URI'])
+				'URL'         => parse_url($_SERVER['REQUEST_URI']),
+				'PHP'		  => $php['class']
 			);
 			 
 			// var_dump($assign['TPL_EXISTS']);
 			// exit;
 			$this->_SET['HTML']['JSAN'] = file_get_contents($this->_CFG['dir']['bin'].'/js/ux/JSAN.js');
-
-
-
+ 
 			// Initate Smarty and Pass the assigned vars.
 			$this->initSmarty(array_merge($assign, $this->_SET));
+		}
+
+		private function lookForFile()
+		{
+ 
+			 
+			if(isset($_SERVER['REDIRECT_URL'])){
+				$look = $_SERVER['REDIRECT_URL'];
+				//$look = str_replace($this->_SET['action'].'/', '', $look);
+				 
+			
+				$c = $this->_CFG;
+				$_dir = __DIR__.'/../../'.$c['suite'].'/';
+
+				foreach ($this->getXtras() as $key => $value) {
+					$file = $_dir.$value['class'].'/'.$look;
+					
+					if(file_exists($file)){
+						$imginfo = getimagesize($file);
+						header("Content-type: ".$imginfo['mime']);
+						readfile($file);
+						exit;
+					}
+				}
+			}
 		}
 
  		/**
@@ -762,24 +815,32 @@
 			$this->smarty->config_dir   = $dir."/configs";
  			$this->smarty->template_dir =  array(
  				$this->_CFG['dir']['html'],
- 				$this->_CFG['dir']['Xtra']
+ 				$this->_CFG['dir']['Xtra'] 
  			);
 
 			$this->smarty->assign($a);			
  
-			
-			if($this->_CFG['debug']['cache']  == false){
-				$this->smarty->clearAllCache();
-			}
-
-
 			ob_clean();
-			$this->smarty->display('index.tpl');
-			//
+			$this->smarty->display('index.tpl'); 
+
 			if($this->_CFG['debug']['cache']  == false){
 				$this->smarty->clearAllCache();
 			}
 
+			// $parent = 'index.tpl';
+
+			// $child = "layout/$a[LAYOUT]/frame.tpl";
+			
+			// $grandchild = ($a['Xtra'] != '' AND $a['method']  != '' AND ($a['Xtra'] != 'index') ) ? 
+			// 	"../$a[suite]/x".ucfirst($a['Xtra'])."/$a[method].tpl" : 
+			// 	"$a[Door]/portal.tpl";
+			 
+			// //$head = $this->_CFG['dir']['Xtra']."/".ucfirst($a['Xtra'])."/html.head.tpl";
+
+			// //$this->smarty->assign("child_tpl", $child);
+
+			// $this->smarty->display("$parent");
+			
 			return $this->smarty;
 		}
 
@@ -1441,7 +1502,7 @@
 			return $this->RPC = $c;
 		}
 
-		function is_email ($email, $checkDNS = false) {
+		function is_email($email, $checkDNS = false) {
 	        //      Check that $email is a valid address
 	        //              (http://tools.ietf.org/html/rfc3696)
 	        //              (http://tools.ietf.org/html/rfc2822)
