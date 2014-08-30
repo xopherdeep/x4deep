@@ -2,7 +2,7 @@
 	/**
 	 * Xengine Version 2.x
 	 * @author XopherDeeP <heylisten@xtiv.net>
-	 * @version v2.2.7
+	 * @version v2.2.8
 	**/
 	
 	/*
@@ -181,14 +181,21 @@
 			// This Function Sets all the variables on where the Client IS based on the URL they've Hit.
 			$this->uri         = substr( $_SERVER['REQUEST_URI'], 1 );	// Begins with a / - slice it off.
 			$this->url         = parse_url( $this->uri );				
+			
+			 
+
 			$this->_SET['params']        = (isset($this->url['path'])) ? explode('/', $this->url['path']) : array('/');
 			
 			
-			if(!isset($this->_SET['params'][1])){
-				$this->_SET['params'] = array('','');
-			}
+			// if(!isset($this->_SET['params'][1])){
+			// 	$this->_SET['params'] = array('','');
+			// }
 
 			 
+				// var_dump($this->_SET['params']);
+				// exit();
+
+
 			// BOOL
 			$this->atSideDoor  = ($this->_SET['params'][0] === $this->_CFG['dir']['sidedoor'] 
 				|| $this->_SET['params'][1] === $this->_CFG['dir']['sidedoor']);	 
@@ -442,8 +449,6 @@
 				
 				if(is_array($return))
 					$this->_SET = array_merge($return,$this->_SET);
-				
-
 
 				// $this->dump($this->_SET); 
 
@@ -751,7 +756,7 @@
 				'LAYOUTS'     =>  $this->_CFG['html'],
 				'thumb'       => '/'.$this->_CFG['dir']['backdoor'].'/'.$lib.'/phpThumb/phpThumb.php?f=png&q=100&',
 				'URL'         => parse_url($_SERVER['REQUEST_URI']),
-				'PHP'		  => $php['class']
+				'PHP'		  => $php
 			);
 			 
 			// var_dump($assign['TPL_EXISTS']);
@@ -844,9 +849,21 @@
 
 
 
+				// $look = str_replace('/'.$this->_SET['method'], '', $look);
+				
+
 				foreach ($this->getXtras() as $key => $value) {
+					 // echo $value['class'].'<br/>';
+					$look = $_SERVER['REDIRECT_URL'];
+					
+					$replace =lcfirst(substr($value['class'], 1));
+
+					$look = str_replace($replace, '', $look);
+					
+
+
 					$file = $_dir.$value['class'].$look;
-					$file;
+					
 					
 					if(file_exists($file)){
 						$type =  $this->mime_content_type($file);
@@ -857,7 +874,8 @@
 
 						exit;
 					}
-				}
+
+				} 
 			} 
 		}
 
@@ -1581,7 +1599,7 @@
 			return $this->RPC = $c;
 		}
 
-		function is_emai($email, $checkDNS = false) {
+		function is_email($email, $checkDNS = false) {
 	        //      Check that $email is a valid address
 	        //              (http://tools.ietf.org/html/rfc3696)
 	        //              (http://tools.ietf.org/html/rfc2822)
