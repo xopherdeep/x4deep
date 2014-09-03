@@ -2,7 +2,7 @@
 	/**
 	 * Xengine Version 2.x
 	 * @author XopherDeeP <heylisten@xtiv.net>
-	 * @version v2.2.8
+	 * @version v2.2.9
 	**/
 	
 	/*
@@ -770,58 +770,58 @@
 		private function mime_content_type($filename) { 
 	        $mime_types = array(
 
-	            'txt' => 'text/plain',
-	            'htm' => 'text/html',
-	            'html' => 'text/html',
-	            'php' => 'text/html',
-	            'css' => 'text/css',
-	            'js' => 'application/javascript',
-	            'json' => 'application/json',
-	            'xml' => 'application/xml',
-	            'swf' => 'application/x-shockwave-flash',
-	            'flv' => 'video/x-flv',
-
-	            // images
-	            'png' => 'image/png',
-	            'jpe' => 'image/jpeg',
-	            'jpeg' => 'image/jpeg',
-	            'jpg' => 'image/jpeg',
-	            'gif' => 'image/gif',
-	            'bmp' => 'image/bmp',
-	            'ico' => 'image/vnd.microsoft.icon',
-	            'tiff' => 'image/tiff',
-	            'tif' => 'image/tiff',
-	            'svg' => 'image/svg+xml',
-	            'svgz' => 'image/svg+xml',
-
-	            // archives
-	            'zip' => 'application/zip',
-	            'rar' => 'application/x-rar-compressed',
-	            'exe' => 'application/x-msdownload',
-	            'msi' => 'application/x-msdownload',
-	            'cab' => 'application/vnd.ms-cab-compressed',
-
-	            // audio/video
-	            'mp3' => 'audio/mpeg',
-	            'qt' => 'video/quicktime',
-	            'mov' => 'video/quicktime',
-
-	            // adobe
-	            'pdf' => 'application/pdf',
-	            'psd' => 'image/vnd.adobe.photoshop',
-	            'ai' => 'application/postscript',
-	            'eps' => 'application/postscript',
-	            'ps' => 'application/postscript',
-
-	            // ms office
-	            'doc' => 'application/msword',
-	            'rtf' => 'application/rtf',
-	            'xls' => 'application/vnd.ms-excel',
-	            'ppt' => 'application/vnd.ms-powerpoint',
-
-	            // open office
-	            'odt' => 'application/vnd.oasis.opendocument.text',
-	            'ods' => 'application/vnd.oasis.opendocument.spreadsheet',
+				'txt'  => 'text/plain',
+				'htm'  => 'text/html',
+				'html' => 'text/html',
+				'php'  => 'text/html',
+				'css'  => 'text/css',
+				'js'   => 'application/javascript',
+				'json' => 'application/json',
+				'xml'  => 'application/xml',
+				'swf'  => 'application/x-shockwave-flash',
+				'flv'  => 'video/x-flv',
+				
+				// images
+				'png'  => 'image/png',
+				'jpe'  => 'image/jpeg',
+				'jpeg' => 'image/jpeg',
+				'jpg'  => 'image/jpeg',
+				'gif'  => 'image/gif',
+				'bmp'  => 'image/bmp',
+				'ico'  => 'image/vnd.microsoft.icon',
+				'tiff' => 'image/tiff',
+				'tif'  => 'image/tiff',
+				'svg'  => 'image/svg+xml',
+				'svgz' => 'image/svg+xml',
+				
+				// archives
+				'zip'  => 'application/zip',
+				'rar'  => 'application/x-rar-compressed',
+				'exe'  => 'application/x-msdownload',
+				'msi'  => 'application/x-msdownload',
+				'cab'  => 'application/vnd.ms-cab-compressed',
+				
+				// audio/video
+				'mp3'  => 'audio/mpeg',
+				'qt'   => 'video/quicktime',
+				'mov'  => 'video/quicktime',
+				
+				// adobe
+				'pdf'  => 'application/pdf',
+				'psd'  => 'image/vnd.adobe.photoshop',
+				'ai'   => 'application/postscript',
+				'eps'  => 'application/postscript',
+				'ps'   => 'application/postscript',
+				
+				// ms office
+				'doc'  => 'application/msword',
+				'rtf'  => 'application/rtf',
+				'xls'  => 'application/vnd.ms-excel',
+				'ppt'  => 'application/vnd.ms-powerpoint',
+				
+				// open office
+				'odt'  => 'application/vnd.oasis.opendocument.text',
+				'ods'  => 'application/vnd.oasis.opendocument.spreadsheet',
 	        );
 
 	        $ext = strtolower(array_pop(explode('.',$filename)));
@@ -863,14 +863,36 @@
 
 
 					$file = $_dir.$value['class'].$look;
-					
-					
+					 
 					if(file_exists($file)){
-						$type =  $this->mime_content_type($file);
+						
 						ob_clean();
-						header("Content-type: $type");
+
+
+
+						$ext = explode('.', $_SERVER['REQUEST_URI']); 
+						$ext = $ext[count($ext)-1];
+						
+						if(strtolower($ext) == 'html'){ 
+							$type =  $this->mime_content_type($file); 
+							header("Content-type: $type");
+							readfile($file);
+						}else{
+							header("Location: /".str_replace(DOC_ROOT, '', $file));
+						}
+
+						// mayber we should redirect it?
+						
+ 						
+ 						// 
+						// include($file);
+
+						//
+						// readfile($file);
+
+						
 						// Actuall file exist in xtra .display it.
-						header("Location: /".str_replace(DOC_ROOT, '', $file));
+						
 
 						exit;
 					}
