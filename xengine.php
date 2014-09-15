@@ -2,7 +2,7 @@
 	/**
 	 * Xengine Version 2.x
 	 * @author XopherDeeP <heylisten@xtiv.net>
-	 * @version v2.2.9
+	 * @version v2.3.0
 	**/
 	
 	/*
@@ -848,10 +848,6 @@
 				$_dir = XPHP_DIR.'/';
 
 
-
-				// $look = str_replace('/'.$this->_SET['method'], '', $look);
-				
-
 				foreach ($this->getXtras() as $key => $value) {
 					 // echo $value['class'].'<br/>';
 					$look = $_SERVER['REDIRECT_URL'];
@@ -865,10 +861,7 @@
 					$file = $_dir.$value['class'].$look;
 					 
 					if(file_exists($file)){
-						
 						ob_clean();
-
-
 
 						$ext = explode('.', $_SERVER['REQUEST_URI']); 
 						$ext = $ext[count($ext)-1];
@@ -877,24 +870,12 @@
 							$type =  $this->mime_content_type($file); 
 							header("Content-type: $type");
 							readfile($file);
+							exit;
 						}else{
 							header("Location: /".str_replace(DOC_ROOT, '', $file));
 						}
 
-						// mayber we should redirect it?
-						
- 						
- 						// 
-						// include($file);
-
-						//
-						// readfile($file);
-
-						
-						// Actuall file exist in xtra .display it.
-						
-
-						exit;
+						// exit;
 					}
 
 				} 
