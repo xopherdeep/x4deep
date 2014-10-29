@@ -2,7 +2,7 @@
 	/**
 	 * Xengine Version 2.x
 	 * @author XopherDeeP <heylisten@xtiv.net>
-	 * @version v2.2.9.1
+	 * @version v2.2.9.2
 	**/
 	
 	/*
@@ -22,7 +22,7 @@
 			'method'	=> '',
 			'HTML' => array(
 				'HEAD' => array(
-					'TITLE' => null,
+					'TITLE' => 'superdom Powered',
 					'CSS'   => '',
 					'JS'    => '',
 					'STYLE' => ''
@@ -746,9 +746,7 @@
 				'LANG'        => $lang ,
 				
 				// KEY
-				'masterKey'   => $this->Key,
-				
-				
+				'masterKey'   => $this->Key, 
 				// Depreciate
 				'IS_ADMIN'    => $this->_LANG,
 				'blox'        => false,
