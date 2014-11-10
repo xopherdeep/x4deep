@@ -2,7 +2,7 @@
 	/**
 	 * Xengine Version 2.x
 	 * @author XopherDeeP <heylisten@xtiv.net>
-	 * @version v2.2.9.2
+	 * @version v2.2.9.3
 	**/
 	
 	/*
@@ -396,11 +396,13 @@
 			// Look to see if any Xtra matches
 			$Xtra = 'x'.ucwords($this->_SET['action']);
 
-			$this->_comment("Looking for Class $Xtra");
-			$php  = XPHP_DIR."/$Xtra/$Xtra.php";
-			$this->_comment("Looking for file $php");
-			if( file_exists($php) ){
-				$this->runXtra($Xtra,$php);
+			if($Xtra != 'xIndex'){
+				$this->_comment("Looking for Class $Xtra");
+				$php  = XPHP_DIR."/$Xtra/$Xtra.php";
+				$this->_comment("Looking for file $php");
+				if( file_exists($php) ){
+					$this->runXtra($Xtra,$php);
+				}
 			}
 		}
 
