@@ -790,6 +790,11 @@
       $this->_SET['HTML']['JSAN'] = file_get_contents($this->_CFG['dir']['bin'] . '/js/ux/JSAN.js');
 
       // Initate Smarty and Pass the assigned vars.
+      
+      $this->set('alpha',false);
+      $this->set('beta',false);
+      $this->set('delta',false);
+      $this->set('omega',false);
 
       $this->initSmarty(array_merge($assign, $this->_SET));
     }
@@ -915,7 +920,6 @@
     private
     function initSmarty($a)
     {
-
       // Include the Smarty Class
 
       $this->lib($this->_CFG['SMARTY_V'] . '/libs/Smarty.class.php');
@@ -1139,13 +1143,18 @@
                 $info = $this->readPhpComment($doc);
                 $ext = explode('.', $file);
                 $jig = array(
-                  'author' => '',
-                  'class' => $ext[0],
-                  'file' => $file,
-                  'icon' => '',
-                  'link' => '',
-                  'mini' => '',
-                  'name' => '',
+                  'author'  => '',
+                  'class'   => $ext[0],
+                  'file'    => $file,
+                  'icon'    => '',
+                  'link'    => '',
+                  'mini'    => '',
+                  'name'    => '',
+                  'alpha'   => '',
+                  'beta'    => '',
+                  'delta'   => '',
+                  'omega'   => '',
+                  'see'     => '',
                   'version' => 0
                 );
                 $files[$file] = array_merge($jig, $info);
