@@ -52,7 +52,6 @@
       if (!defined('DB_CFG')) define("DB_CFG", $cfg['dir']['cfg'] . "/cfg.db.$_SERVER[HTTP_HOST].inc");
       if (!defined('SVR_FILES')) define("SVR_FILES", CFG_DIR . "/$_SERVER[HTTP_HOST]");
       if (!defined('HTTP_HOST')) define("HTTP_HOST", $_SERVER['HTTP_HOST']);
-
       // Installation
 
       if (!is_dir($cfg['dir']['libs'])) {
@@ -105,7 +104,6 @@
         ));
 
         // $this->dump($this->_SET);
-
         $this->browse();
       }
     }
@@ -141,7 +139,6 @@
     function whoAmI($who = false)
     {
       // Define Their KEY - Refrenced for Access.
-
       $this->Key = array(
         'is' => array(
           'admin' => isset($_SESSION['user']) ? ($_SESSION['user']['power_lvl'] > 7) : false,
@@ -185,7 +182,6 @@
       $this->atSideDoor = ($this->_SET['params'][0] === $this->_CFG['dir']['sidedoor'] || $this->_SET['params'][1] === $this->_CFG['dir']['sidedoor']);
 
       // Back Door - Admin Panel of Pages.
-
       $this->atBackDoor = ($this->_SET['params'][0] === $this->_CFG['dir']['backdoor']); // BOOL
       $this->atGodDoor = ($this->_SET['params'][0] === $this->_CFG['dir']['goddoor']); // BOOL
       $this->atFrontDoor = ($this->atGodDoor || $this->atBackDoor || $this->atSideDoor) ? false : true;
