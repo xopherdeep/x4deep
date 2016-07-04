@@ -10,6 +10,7 @@
   **/
   class Xengine
   {
+    public $firephp;
     var $_CFG;
     var $_SET = array(
       'action' => '',
@@ -34,12 +35,15 @@
     var $_debugReport = array();
     function __construct($cfg = false, $parent = false)
     {
-      $this->_comment("Xengine Started!");
+      $this->firephp = FirePHP::getInstance(true);
+      $this->firephp->fb($_SERVER['REQUEST_URI'],"Request",'DEBUG');
+      $this->firephp->fb(get_class($this),"__construct",'INFO');
+      $this->lib('x4deep/xTools.php');
+
       ini_set('display_errors', $cfg['debug']['on']);
       if (!$cfg) die("Configuration Needed");
 
       // We need to be able to write to this directory...
-
       if (!is_writeable($cfg['dir']['cfg'])) {
         die($cfg['dir']['cfg'] . " Not Writable!");
       }
@@ -53,7 +57,6 @@
       if (!defined('SVR_FILES')) define("SVR_FILES", CFG_DIR . "/$_SERVER[HTTP_HOST]");
       if (!defined('HTTP_HOST')) define("HTTP_HOST", $_SERVER['HTTP_HOST']);
       // Installation
-
       if (!is_dir($cfg['dir']['libs'])) {
       }
     }
@@ -76,9 +79,7 @@
         $this->openDoor(); // Open the Door a.k.a Execute Mods.
         $this->browse(); // Display the Content, HTML, JSON, XML, JPEG.
         exit; // EXIT
-      }
-
-      catch(Exception $e) {
+      } catch(Exception $e) {
         $this->githubIssue(array(
           'summary' => 'X ERROR :: ' . $e->getMessage() ,
           'description' => $e->getMessage() ,
@@ -165,7 +166,6 @@
       }
 
       // This Function Sets all the variables on where the Client IS based on the URL they've Hit.
-
       $this->uri = substr($_SERVER['REQUEST_URI'], 1); // Begins with a / - slice it off.
       $this->url = parse_url($this->uri);
       $this->_SET['params'] = (isset($this->url['path'])) ? explode('/', $this->url['path']) : array(
@@ -179,7 +179,13 @@
       // exit();
       // BOOL
 
-      $this->atSideDoor = ($this->_SET['params'][0] === $this->_CFG['dir']['sidedoor'] || $this->_SET['params'][1] === $this->_CFG['dir']['sidedoor']);
+      $this->atSideDoor = (
+        $this->_SET['params'][0] === $this->_CFG['dir']['sidedoor']
+        ||
+        $this->_SET['params'][1] === $this->_CFG['dir']['sidedoor']
+      );
+
+      // $this->atSideDoor = (isset($_POST['_pjax']));
 
       // Back Door - Admin Panel of Pages.
       $this->atBackDoor = ($this->_SET['params'][0] === $this->_CFG['dir']['backdoor']); // BOOL
@@ -205,21 +211,18 @@
     function howAmI()
     {
       // ../Xtra/method/param1/param2/param3/etc
-
       $p = $this->_SET['params'];
       $this->_SET['action'] = $this->_SET['method'] = 'index';
 
       // If we are at the back door, remove it out of our params.
       // First check to see which door we're at.
-
       if ($this->atBackDoor || $this->atGodDoor) {
         unset($p[0]);
         $p = array_values($p);
       }
 
       // Now check the side door.
-
-      if ($this->atSideDoor) {
+      if ($this->atSideDoor && !isset($_POST['_pjax'])) {
         unset($p[0]);
         $p = array_values($p);
       }
@@ -251,34 +254,23 @@
     private
     function openDoor()
     {
-
       // Door #1
       // If we Do not have a DB Connected & Setup; Run through the DB Setup.
-
       if (false == file_exists(DB_CFG)) {
-
         // We need to know how to connect to our db first!
         // This Xtra configures the Connection to the Database.
-
         $this->_SET['action'] = 'wwwSetup';
         $this->_SET['method'] = 'install';
         $this->atSideDoor = true;
-
-        // $this->dump()
-
-      }
-      else {
-
+      } else {
         // With the DB communicating, we able to Run!
         // Let the Dogs Run and Bark at them: AutoRuns.
         // Access, Login, Analytics, Backup, wwwSetup
-
         $this->autoRunSniff();
       }
 
       // The Door is Open; All the Xtras are Locked & Loaded; the Xengine is Up and Running;
       // Allow them to the Walk the Path Requested, ie: /login/logout )
-
       $this->walkPath();
     }
 
@@ -289,24 +281,18 @@
     private
     function autoRunSniff()
     {
-
       // autoRun the  requisets.
-
       $_SESSION['xRan']++;
-      $this->_comment('Xengine started: ' . $_SESSION['xRan']);
-      $this->_comment("Running AutoRun Xtra's");
+      $this->firephp->fb('Xengine started: ' . $_SESSION['xRan']);
+      $this->firephp->fb("Running AutoRun Xtra's");
 
       // $this->dump($this->q());
-
       $q = $this->q();
-
       // ok... we have a db file. but do we have a db!?
 
       $this->Q("SHOW TABLES LIKE '" . $this->Q->db['prefix'] . "configs'");
       if ($q->ERROR) {
-
         // Log the Error to The Trac System!!!!
-
         $sql = '';
         if (isset($this->Q->sql)) {
           $sql = $this->removeLocalData($this->lang($this->_LANG['DB']['ERROR']['SQL'], array(
@@ -321,9 +307,7 @@
           'description' => $description,
           'attr' => array(
             'type' => 'defect',
-
             // 'component' => 'x'.ucfirst($this->_SET['action']),
-
             'priority' => 'trivial',
             'reporter' => $_SESSION['user']['username'] . '@' . $_SERVER['HTTP_HOST'],
             'keywords' => $this->_SET['action'] . '::' . $this->_SET['method']
@@ -344,21 +328,18 @@
         if (isset($_GET['theme'])) {
           $this->STYLE = $_GET['theme'];
         }
-
         $xphp = $this->getXtras();
 
         // $this->dump($xphp);
-
         foreach($xphp as $k => $x) {
           try {
             $class = $x['class'];
             $methods = get_class_methods($class);
             if (in_array('autoRun', $methods)) {
-              $this->_comment("Auto Run: " . $class);
+              $this->firephp->fb("Auto Run: " . $class);
               $this->_xtra = $class;
 
               // $return = $class::autoRun($this);
-
               $class = new $class($this->_CFG);
               $class = $this->mergeO($class, $this);
               $return = call_user_func_array(array(
@@ -367,7 +348,7 @@
               ) , array(
                 $this
               ));
-              $this->_comment('AutoRan ' . get_class($class) . ': ');
+              $this->firephp->fb('AutoRan ' . get_class($class) . ': ');
               foreach($class as $key => $value) {
                 $this->$key = $value;
               }
@@ -377,12 +358,10 @@
                 $this->_SET = array_merge($return, $this->_SET);
               }
 
-              $this->_comment("AutoRun Found in: " . get_class($class) . " ~ Complete...");
+              $this->firephp->fb("AutoRun Found in: " . get_class($class) . " ~ Complete...");
             }
-          }
-
-          catch(Exception $e) {
-            $this->_comment($e->getMessage());
+          } catch(Exception $e) {
+            $this->firephp->fb($e->getMessage());
           }
         }
       }
@@ -391,15 +370,15 @@
     private
     function walkPath()
     {
-      $this->_comment("Xtra: " . $this->_SET['action'] . " | Method:" . $this->_SET['method']);
+      $this->firephp->fb("Xtra: " . $this->_SET['action'] . " | Method:" . $this->_SET['method']);
 
       // Look to see if any Xtra matches
 
       $Xtra = 'x' . ucwords($this->_SET['action']);
       if ($Xtra != 'xIndex') {
-        $this->_comment("Looking for Class $Xtra");
+        $this->firephp->fb("Looking for Class $Xtra");
         $php = XPHP_DIR . "/$Xtra/$Xtra.php";
-        $this->_comment("Looking for file $php");
+        $this->firephp->fb("Looking for file $php");
         if (file_exists($php)) {
           $this->runXtra($Xtra, $php);
         }
@@ -446,7 +425,7 @@
         // $Xtra->Q = $this->Q;
         // call the function w/ params
 
-        $this->_comment("Running $php");
+        $this->firephp->fb("Running $php");
         array_values($this->_SET['params']);
         $return = call_user_func_array(array(
           $Xtra,
@@ -517,7 +496,7 @@
     private
     function browse()
     {
-      $this->_comment("Sending data to Browser");
+      $this->firephp->fb("Sending data to Browser");
 
       // Dislays/Outputs Data To Browser.
 
@@ -540,9 +519,7 @@
       ob_clean();
       if (isset($_REQUEST['callback'])) {
         $callback = $_REQUEST['callback'];
-
         // start output
-
         if ($callback) {
           header('Content-Type: text/javascript');
           echo $callback . '(' . json_encode($array) . ');';
@@ -557,9 +534,7 @@
       else {
         switch ($type) {
         default:
-
           // HTML
-
           header('Content-Type: text/html');
           $this->viewTemplate();
           break;
@@ -717,9 +692,7 @@
       }
       else
       if (!file_exists($tpl)) {
-
         // This could be somewhere ...
-
         $this->set(array(
           'action' => 'access',
           'method' => '404',
@@ -731,66 +704,52 @@
           )
         ));
         $this->lookForFile();
-
         // $this->_SET['HTML']['HEAD']['TITLE'] = "Page Template Not Found";
 
       }
 
       if (is_array($this->_SET['_LANG'])) {
         $lang = array_merge_recursive($this->_LANG, $this->_SET['_LANG']);
+      } else{
+        $lang = $this->_LANG;
       }
 
       $assign = array(
-
-        // f
-
-        'lib_core' => $this->_CFG['lib_core'],
-
-        // 'version'  =>'4',
-
-        'Xtra' => $this->_SET['action'],
-        'method' => $this->_SET['method'],
-        'params' => $this->_SET['params'],
-        'Door' => $html_door,
-        'toBackDoor' => $this->_CFG['dir']['backdoor'],
-        'toFrontDoor' => $this->_CFG['dir']['frontdoor'],
-        'toSideDoor' => $this->_CFG['dir']['sidedoor'],
-        'toGodDoor' => $this->_CFG['dir']['goddoor'],
-        'HTTP_HOST' => $_SERVER['HTTP_HOST'],
-        'html_title' => $_SERVER['HTTP_HOST'],
-        'USER' => $_SESSION['user'],
-        'ERROR' => false, // Set this to Display an Errord
-
+        'lib_core'      => $this->_CFG['lib_core'],
+        'Xtra'          => $this->_SET['action'],
+        'method'        => $this->_SET['method'],
+        'params'        => $this->_SET['params'],
+        'Door'          => $html_door,
+        'toBackDoor'    => $this->_CFG['dir']['backdoor'],
+        'toFrontDoor'   => $this->_CFG['dir']['frontdoor'],
+        'toSideDoor'    => $this->_CFG['dir']['sidedoor'],
+        'toGodDoor'     => $this->_CFG['dir']['goddoor'],
+        'HTTP_HOST'     => $_SERVER['HTTP_HOST'],
+        'html_title'    => $_SERVER['HTTP_HOST'],
+        'USER'          => $_SESSION['user'],
+        'ERROR'         => false, // Set this to Display an Errord
         // Sets the template variable TPL_EXISTS to make sure we have the page
-
-        'LANG' => $lang,
-
+        'LANG'          => $lang,
         // KEY
-
-        'masterKey' => $this->Key,
-
+        'masterKey'     => $this->Key,
         // Depreciate
-
-        'IS_ADMIN' => $this->_LANG,
-        'blox' => false,
-        'LAYOUT' => $layout,
-        'LAYOUTS' => $this->_CFG['html'],
-        'thumb' => '/' . $this->_CFG['dir']['backdoor'] . '/' . $lib . '/phpThumb/phpThumb.php?f=png&q=100&',
-        'URL' => parse_url($_SERVER['REQUEST_URI']) ,
-        'PHP' => $php
+        'IS_ADMIN'      => $this->_LANG,
+        'blox'          => false,
+        'LAYOUT'        => $layout,
+        'LAYOUTS'       => $this->_CFG['html'],
+        'thumb'         => '/' . $this->_CFG['dir']['backdoor'] . '/' . $lib . '/phpThumb/phpThumb.php?f=png&q=100&',
+        'URL'           => parse_url($_SERVER['REQUEST_URI']) ,
+        'PHP'           => $php
       );
 
-      // var_dump($assign['TPL_EXISTS']);
-      // exit;
-
       $this->_SET['HTML']['JSAN'] = file_get_contents($this->_CFG['dir']['bin'] . '/js/ux/JSAN.js');
-
       // Initate Smarty and Pass the assigned vars.
-      
       $this->set('alpha',false);
       $this->set('beta',false);
       $this->set('delta',false);
       $this->set('omega',false);
+      $this->set('_POST',$_POST);
+      $this->set('_GET',$_GET);
 
       $this->initSmarty(array_merge($assign, $this->_SET));
     }
@@ -943,19 +902,17 @@
       );
       $this->smarty->assign($a);
       ob_clean();
+      // function minify_html($tpl_output, Smarty_Internal_Template $template) {
+      //     $tpl_output = preg_replace('![\t ]*[\r\n]+[\t ]*!', '', $tpl_output);
+      //     return $tpl_output;
+      // }
+      // $this->smarty->registerFilter("output", "minify_html");
+      $this->smarty->loadFilter('output', 'trimwhitespace');
       $this->smarty->display('index.tpl');
       if ($this->_CFG['debug']['cache'] == false) {
         $this->smarty->clearAllCache();
       }
 
-      // $parent = 'index.tpl';
-      // $child = "layout/$a[LAYOUT]/frame.tpl";
-      // $grandchild = ($a['Xtra'] != '' AND $a['method']  != '' AND ($a['Xtra'] != 'index') ) ?
-      //  "../$a[suite]/x".ucfirst($a['Xtra'])."/$a[method].tpl" :
-      //  "$a[Door]/portal.tpl";
-      // //$head = $this->_CFG['dir']['Xtra']."/".ucfirst($a['Xtra'])."/html.head.tpl";
-      // //$this->smarty->assign("child_tpl", $child);
-      // $this->smarty->display("$parent");
 
       return $this->smarty;
     }
@@ -1043,10 +1000,9 @@
 
     function lib($file)
     {
-      $this->_comment(get_class($this) . " Requesting Library $file");
+      $this->firephp->fb(get_class($this) . " Requesting Library $file");
       try {
         require_once (LIBS_DIR . '/' . $file);
-
       }
 
       catch(Exception $e) {
@@ -1068,7 +1024,7 @@
         $c = get_parent_class($this);
         $this->Q = parent::q();
         } */
-        $this->_comment("Init DB from: " . get_class($this));
+        $this->firephp->fb("Init DB from: " . get_class($this));
         require (DB_CFG);
 
         foreach($this->db as $key => $value) {
@@ -1083,14 +1039,14 @@
 
         $db = "x" . $this->_CFG['db'];
         if (!class_exists($db)) {
-          $this->_comment('Loading DB');
+          $this->firephp->fb('Loading DB');
           $this->lib("x4deep/$db.php");
         }
 
         $this->Q = new $db($this->db['host'], $this->db['user'], $this->db['pass'], $this->db['database'], $this->db['prefix']);
       }
       else {
-        $this->_comment("Recycled DB from: " . get_class($this));
+        $this->firephp->fb("Recycled DB from: " . get_class($this));
 
         // $this->Q = parent::q();
 
@@ -1112,14 +1068,14 @@
 
         if ($handle = opendir(XPHP_DIR)) {
           $time = microtime(true);
-          $this->_comment("Loading Xtra Files...");
+          $this->firephp->fb("Loading Xtra Files...");
           $files = array();
 
           // Open the Xtras Directory
 
           while (false !== ($file = readdir($handle))) {
             if (substr($file, 0, 1) == 'x') {
-              $this->_comment("Opening Directory: $file");
+              $this->firephp->fb("Opening Directory: $file");
 
               // Open the PHP File, which should be the same name as the Directory
 
@@ -1127,7 +1083,7 @@
               $file = $file . '.php';
               require_once (XPHP_DIR . '/' . $class . '/' . $file);
 
-              $this->_comment("Loaded Xtra: $class File: $file");
+              $this->firephp->fb("Loaded Xtra: $class File: $file");
               $rc = new ReflectionClass($class);
               $doc = $rc->getDocComment();
               if ($doc) {
@@ -1165,7 +1121,7 @@
 
           $this->_xtras = $this->_SET['xtras'] = $files;
           $time = round(microtime(true) - $time, 5);
-          $this->_comment("Loaded " . count($files) . " Xtra Files in " . $time);
+          $this->firephp->fb("Loaded " . count($files) . " Xtra Files in " . $time);
         }
       }
       else {
@@ -1188,11 +1144,11 @@
       // Go through all the modules.
 
       $mods = $this->getXTras();
-      $this->_comment(count($mods) . " mods");
+      $this->firephp->fb(count($mods) . " mods");
       foreach($mods as $k => $v) {
         $php = str_replace('.php', '', $k);
         if (method_exists($php, 'dbSync')) {
-          $this->_comment(" <hr/> DB: Syncing $php");
+          $this->firephp->fb(" <hr/> DB: Syncing $php");
           $db = $php::dbSync();
           if (!empty($db)) {
             foreach($db as $table => $columns) {
@@ -1227,13 +1183,13 @@
 
       $sql = '';
       $c = $q->Q("SHOW TABLES LIKE '$q->PREFIX$table'");
-      $this->_comment("Syncing Table: $table");
+      $this->firephp->fb("Syncing Table: $table");
       if (!empty($c)) {
         $c = $q->Q("DESC $q->PREFIX$table");
       }
 
       if (!empty($c) && is_array($columns)) {
-        $this->_comment('<fieldset><legend>' . $table . '</legend> ');
+        $this->firephp->fb('<fieldset><legend>' . $table . '</legend> ');
         foreach($c as $k => $v) {
           $col = $v['Field'];
 
@@ -1270,7 +1226,7 @@
           }
 
           $this->dump($v, true, false);
-          $this->_comment('<hr/>');
+          $this->firephp->fb('<hr/>');
         }
 
         // Change Columns
@@ -1287,14 +1243,14 @@
 
           }
 
-          $this->_comment('Changing Column: ' . $q->mSql);
+          $this->firephp->fb('Changing Column: ' . $q->mSql);
 
           // return $q->error;
 
         }
 
-        $this->_comment(" ");
-        $this->_comment('</table></fieldset>');
+        $this->firephp->fb(" ");
+        $this->firephp->fb('</table></fieldset>');
 
         // New columns
 
@@ -1303,7 +1259,7 @@
             if (is_array($v)) {
               $sync = "`$k` " . $v['Type'];
               $q->Q("ALTER TABLE `$q->PREFIX$table` ADD $sync");
-              $this->_comment('New Column: ' . $q->mSql);
+              $this->firephp->fb('New Column: ' . $q->mSql);
             }
           }
         }
@@ -1343,7 +1299,7 @@
             $q->Q("RENAME TABLE $table TO $q->PREFIX$columns");
           }
 
-          $this->_comment('Renable Table: ' . $table . ' ' . $q->mSql);
+          $this->firephp->fb('Renable Table: ' . $table . ' ' . $q->mSql);
         }
       }
     }
@@ -1533,11 +1489,9 @@
     //
     //
     // This should be used sparingly, and in production only!
-
-    public
-
     function _comment($msg, $clear = false)
     {
+      $this->firephp->fb($msg,'COMMENT',INFO);
       $time = round(microtime(true) - $this->_CFG['debug']['runtime'], 5);
       $echo = $this->_debugReport[] = ">'''[wiki:" . get_class($this) . "]''': ^[~~" . $time . "~~]^ $msg <br/>";
       if ($this->_CFG['debug']['on']) echo $echo;
@@ -1550,7 +1504,7 @@
 
       // code...
 
-      $this->_comment($title);
+      $this->firephp->fb($title);
       $this->_dump($var, $dump, $halt);
     }
 
@@ -1675,7 +1629,7 @@
       // return call_user_method_array($method,$x['class'],$args);
       // throw new Exception("This Method {$method} doesn't exist in ".get_class($this));
 
-      $this->_comment("This Method {$method} doesn't exist in " . get_class($this));
+      $this->firephp->fb("This Method {$method} doesn't exist in " . get_class($this));
     }
 
     public
