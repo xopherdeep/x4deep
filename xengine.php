@@ -406,7 +406,6 @@
     private
     function runXtra($Xtra, $php)
     {
-
       // require the dynamic file.
 
       require_once ($php);
@@ -478,7 +477,12 @@
         // Kill the Engine send a 404!!
 
         $this->lookForFile();
+
         $this->_SET['anchor'] = $this->_SET['action'];
+
+        if(isset($_GET['anchor'])){
+          $this->_SET['anchor'] = $_GET['action'];
+        }
         $this->_SET['action'] = 'access';
         $this->_SET['method'] = '404';
         $this->_SET['params'] = array(
@@ -751,6 +755,9 @@
       $this->set('_POST',$_POST);
       $this->set('_GET',$_GET);
 
+      // if(isset($_GET['anchor'])){
+      //   $this->set('anchor', $_GET['action']);
+      // }
       $this->initSmarty(array_merge($assign, $this->_SET));
     }
 
@@ -898,7 +905,8 @@
       $this->smarty->config_dir = $dir . "/configs";
       $this->smarty->template_dir = array(
         $this->_CFG['dir']['html'],
-        $this->_CFG['dir']['Xtra']
+        $this->_CFG['dir']['html']."/layout/watchtower",
+        $this->_CFG['dir']['Xtra']."/x".ucwords($this->_SET['action'])."/"
       );
       $this->smarty->assign($a);
       ob_clean();
@@ -1109,17 +1117,19 @@
                   'see'     => '',
                   'version' => 0
                 );
-                $files[$file] = array_merge($jig, $info);
+                $files[$file]         = array_merge($jig, $info);
+                $xtraz[$info['name']] = $files[$file];
               }
             }
           }
 
           closedir($handle);
+          ksort($xtraz);
           ksort($files);
 
           // $this->set('xphp_files',$files);
-
           $this->_xtras = $this->_SET['xtras'] = $files;
+          $this->_xtraz = $this->_SET['xtraz'] = $xtraz;
           $time = round(microtime(true) - $time, 5);
           $this->firephp->fb("Loaded " . count($files) . " Xtra Files in " . $time);
         }
