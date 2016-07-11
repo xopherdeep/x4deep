@@ -2,14 +2,13 @@
   /**
     * @class      Xengine v2.x
     * @author     XopherDeeP <heylisten@xtiv.net>
-    * @version    v2.2.9.3
-    * @copyright  2014 MidKnight Knerd
+    * @version    v0.3(160710)
+    * @copyright  Xengenie LLC.
     * @license    The Artistic License 2.0
     * Everyone is permitted to copy and distribute verbatim copies
     * of this license document, but changing it is not allowed.
   **/
-  class Xengine
-  {
+  class Xengine {
     public $firephp;
     var $_CFG;
     var $_SET = array(
