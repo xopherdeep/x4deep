@@ -73,7 +73,7 @@ if(!class_exists('xMySql')){
     	}
     	
     	function DB($db){
-    		mysqli_select_db($this->mConn, $db);   
+    		mysqli_select_db($this->mConn, $db['database']);   
     	}
     	
     	function Q($sql){
