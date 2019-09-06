@@ -55,7 +55,7 @@ if(!class_exists('xMySql')){
             	} */
             	
             	if(!$this->mConn = mysqli_connect($this->db['host'], $this->db['user'], $pass))
-            		throw new Exception( mysql_error() );
+            		throw new Exception( mysqli_error() );
 
             	$_SESSION['sql_conn'][$this->db['host']] = $this->mConn;	
             	// Select DB if given
@@ -73,20 +73,20 @@ if(!class_exists('xMySql')){
     	}
     	
     	function DB($db){
-    		mysql_select_db($db,$this->mConn);   
+    		mysqli_select_db($db,$this->mConn);   
     	}
     	
     	function Q($sql){
     		$this->mSql 	= $sql;
-    		$r 				= mysql_query($this->mSql,$this->mConn);
-    		$this->errno 	= mysql_errno($this->mConn);
+    		$r 				= mysqli_query($this->mSql,$this->mConn);
+    		$this->errno 	= mysqli_errno($this->mConn);
     		
     		switch($r){
     		// MySQL error
     			case(false):
-    				$this->error = mysql_error();
+    				$this->error = mysqli_error();
                     $this->sql     = $sql;
-    				return false; //die(mysql_error()."<br/>".$this->mSql);
+    				return false; //die(mysqli_error()."<br/>".$this->mSql);
     			break;
     			case($r === true):
     				$this->msg = "ran ".$sql;
@@ -94,13 +94,13 @@ if(!class_exists('xMySql')){
     			break;
     		// MySQL Success	
     			default:
-    				$this->mCount       = mysql_num_rows($r);
+    				$this->mCount       = mysqli_num_rows($r);
                     $this->mCountAll    = $this->mCount;
 		    		$this->mData = null;
-		    		while ($row = mysql_fetch_array($r, MYSQL_ASSOC)) {
+		    		while ($row = mysqli_fetch_array($r, mysqli_ASSOC)) {
 					    $this->mData[] = $row;
 					}
-    				mysql_free_result($r);
+    				mysqli_free_result($r);
     				return $this->mData; 
     			break;
     		}
@@ -270,7 +270,7 @@ if(!class_exists('xMySql')){
 	                }
 	            	
 	            	
-	            	$v = mysql_real_escape_string($v);
+	            	$v = mysqli_real_escape_string($v);
 	                
                     if(!is_numeric($v))
                          $v = ($o == "LIKE" || $o == "NOT LIKE") ? "'%$v%'" : "'$v'";    
@@ -310,18 +310,18 @@ if(!class_exists('xMySql')){
     		$values = null;
     		
     		foreach($columns as $k => $v){
-    			$v       = ($v != '') ? mysql_real_escape_string($v) : '';
+    			$v       = ($v != '') ? mysqli_real_escape_string($v) : '';
     			$keys    .= ($keys) ? ",`$k`" : "`$k`";
     			$values  .= ($values) ? ",'$v'" : "'$v'";
     		}
     		$this->Q("INSERT INTO $this->PREFIX$table ($keys) VALUES ($values)");
-    		return mysql_insert_id($this->mConn);
+    		return mysqli_insert_id($this->mConn);
     	}
     	
     	function Update($table,$set_col,$needle){
     		$set = '';
             foreach($set_col as  $c => $v){
-                $v = mysql_real_escape_string($v);
+                $v = mysqli_real_escape_string($v);
                 $q = ($c == $v) ? "`$c` = $c+1" : "`$c` = '$v'";	
                 $set .= ($set) ? ", $q": $q;
             }
@@ -350,8 +350,8 @@ if(!class_exists('xMySql')){
 			if($tables == '*')
 			{
 				$tables = array();
-				$result = mysql_query("SHOW TABLES LIKE '$this->PREFIX%';");
-				while($row = mysql_fetch_row($result))
+				$result = mysqli_query("SHOW TABLES LIKE '$this->PREFIX%';");
+				while($row = mysqli_fetch_row($result))
 				{
 					$tables[] = $row[0];
 				}
@@ -368,19 +368,19 @@ if(!class_exists('xMySql')){
 			$return = '';
 			foreach($tables as $table)
 			{
-				$result = mysql_query('SELECT * FROM '.$table);
-				$num_fields = mysql_num_fields($result);
+				$result = mysqli_query('SELECT * FROM '.$table);
+				$num_fields = mysqli_num_fields($result);
 				
 				// used for import feature.
 				
 				
 				$return .= 'DROP TABLE '.$table.$semicolon;
-				$row2 = mysql_fetch_row(mysql_query('SHOW CREATE TABLE '.$table));
+				$row2 = mysqli_fetch_row(mysqli_query('SHOW CREATE TABLE '.$table));
 				$return.= "\n\n".$row2[1]."$semicolon\n\n";
 				
 				for ($i = 0; $i < $num_fields; $i++) 
 				{
-					while($row = mysql_fetch_row($result))
+					while($row = mysqli_fetch_row($result))
 					{
 						$return.= 'INSERT INTO '.$table.' VALUES(';
 						for($j=0; $j<$num_fields; $j++) 
@@ -447,7 +447,7 @@ if(!class_exists('xMySql')){
 		
         
         function Close(){
-        	mysql_close($this->mConn);
+        	mysqli_close($this->mConn);
         }
         
     }	
