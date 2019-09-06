@@ -9,7 +9,7 @@
     * of this license document, but changing it is not allowed.
   **/
   class Xengine {
-    public $firephp;
+    // public $firephp;
     var $_CFG;
     var $_SET = array(
       'action' => '',
@@ -34,9 +34,9 @@
     var $_debugReport = array();
     function __construct($cfg = false, $parent = false)
     {
-      $this->firephp = FirePHP::getInstance(true);
-      $this->firephp->fb($_SERVER['REQUEST_URI'],"Request",'DEBUG');
-      $this->firephp->fb(get_class($this),"__construct",'INFO');
+      // $this->firephp = FirePHP::getInstance(true);
+      // $this->firephp->fb($_SERVER['REQUEST_URI'],"Request",'DEBUG');
+      // $this->firephp->fb(get_class($this),"__construct",'INFO');
       $this->lib('x4deep/xTools.php');
 
       ini_set('display_errors', $cfg['debug']['on']);
@@ -282,8 +282,8 @@
     {
       // autoRun the  requisets.
       $_SESSION['xRan']++;
-      $this->firephp->fb('Xengine started: ' . $_SESSION['xRan']);
-      $this->firephp->fb("Running AutoRun Xtra's");
+      // $this->firephp->fb('Xengine started: ' . $_SESSION['xRan']);
+      // $this->firephp->fb("Running AutoRun Xtra's");
 
       // $this->dump($this->q());
       $q = $this->q();
@@ -335,7 +335,7 @@
             $class = $x['class'];
             $methods = get_class_methods($class);
             if (in_array('autoRun', $methods)) {
-              $this->firephp->fb("Auto Run: " . $class);
+              // $this->firephp->fb("Auto Run: " . $class);
               $this->_xtra = $class;
 
               // $return = $class::autoRun($this);
@@ -347,7 +347,7 @@
               ) , array(
                 $this
               ));
-              $this->firephp->fb('AutoRan ' . get_class($class) . ': ');
+              // $this->firephp->fb('AutoRan ' . get_class($class) . ': ');
               foreach($class as $key => $value) {
                 $this->$key = $value;
               }
@@ -357,10 +357,10 @@
                 $this->_SET = array_merge($return, $this->_SET);
               }
 
-              $this->firephp->fb("AutoRun Found in: " . get_class($class) . " ~ Complete...");
+              // $this->firephp->fb("AutoRun Found in: " . get_class($class) . " ~ Complete...");
             }
           } catch(Exception $e) {
-            $this->firephp->fb($e->getMessage());
+            // $this->firephp->fb($e->getMessage());
           }
         }
       }
@@ -1007,7 +1007,7 @@
 
     function lib($file)
     {
-      $this->firephp->fb(get_class($this) . " Requesting Library $file");
+      // $this->firephp->fb(get_class($this) . " Requesting Library $file");
       try {
         require_once (LIBS_DIR . '/' . $file);
       }
@@ -1031,7 +1031,7 @@
         $c = get_parent_class($this);
         $this->Q = parent::q();
         } */
-        $this->firephp->fb("Init DB from: " . get_class($this));
+        // $this->firephp->fb("Init DB from: " . get_class($this));
         require (DB_CFG);
 
         foreach($this->db as $key => $value) {
@@ -1046,14 +1046,14 @@
 
         $db = "x" . $this->_CFG['db'];
         if (!class_exists($db)) {
-          $this->firephp->fb('Loading DB');
+          // $this->firephp->fb('Loading DB');
           $this->lib("x4deep/$db.php");
         }
 
         $this->Q = new $db($this->db['host'], $this->db['user'], $this->db['pass'], $this->db['database'], $this->db['prefix']);
       }
       else {
-        $this->firephp->fb("Recycled DB from: " . get_class($this));
+        // $this->firephp->fb("Recycled DB from: " . get_class($this));
 
         // $this->Q = parent::q();
 
@@ -1075,14 +1075,14 @@
 
         if ($handle = opendir(XPHP_DIR)) {
           $time = microtime(true);
-          $this->firephp->fb("Loading Xtra Files...");
+          // $this->firephp->fb("Loading Xtra Files...");
           $files = array();
 
           // Open the Xtras Directory
 
           while (false !== ($file = readdir($handle))) {
             if (substr($file, 0, 1) == 'x') {
-              $this->firephp->fb("Opening Directory: $file");
+              // $this->firephp->fb("Opening Directory: $file");
 
               // Open the PHP File, which should be the same name as the Directory
 
@@ -1090,7 +1090,7 @@
               $file = $file . '.php';
               require_once (XPHP_DIR . '/' . $class . '/' . $file);
 
-              $this->firephp->fb("Loaded Xtra: $class File: $file");
+              // $this->firephp->fb("Loaded Xtra: $class File: $file");
               $rc = new ReflectionClass($class);
               $doc = $rc->getDocComment();
               if ($doc) {
@@ -1130,7 +1130,7 @@
           $this->_xtras = $this->_SET['xtras'] = $files;
           $this->_xtraz = $this->_SET['xtraz'] = $xtraz;
           $time = round(microtime(true) - $time, 5);
-          $this->firephp->fb("Loaded " . count($files) . " Xtra Files in " . $time);
+          // $this->firephp->fb("Loaded " . count($files) . " Xtra Files in " . $time);
         }
       }
       else {
@@ -1153,11 +1153,11 @@
       // Go through all the modules.
 
       $mods = $this->getXTras();
-      $this->firephp->fb(count($mods) . " mods");
+      // $this->firephp->fb(count($mods) . " mods");
       foreach($mods as $k => $v) {
         $php = str_replace('.php', '', $k);
         if (method_exists($php, 'dbSync')) {
-          $this->firephp->fb(" <hr/> DB: Syncing $php");
+          // $this->firephp->fb(" <hr/> DB: Syncing $php");
           $db = $php::dbSync();
           if (!empty($db)) {
             foreach($db as $table => $columns) {
@@ -1192,13 +1192,13 @@
 
       $sql = '';
       $c = $q->Q("SHOW TABLES LIKE '$q->PREFIX$table'");
-      $this->firephp->fb("Syncing Table: $table");
+      // $this->firephp->fb("Syncing Table: $table");
       if (!empty($c)) {
         $c = $q->Q("DESC $q->PREFIX$table");
       }
 
       if (!empty($c) && is_array($columns)) {
-        $this->firephp->fb('<fieldset><legend>' . $table . '</legend> ');
+        // $this->firephp->fb('<fieldset><legend>' . $table . '</legend> ');
         foreach($c as $k => $v) {
           $col = $v['Field'];
 
@@ -1235,7 +1235,7 @@
           }
 
           $this->dump($v, true, false);
-          $this->firephp->fb('<hr/>');
+          // $this->firephp->fb('<hr/>');
         }
 
         // Change Columns
@@ -1252,14 +1252,14 @@
 
           }
 
-          $this->firephp->fb('Changing Column: ' . $q->mSql);
+          // $this->firephp->fb('Changing Column: ' . $q->mSql);
 
           // return $q->error;
 
         }
 
-        $this->firephp->fb(" ");
-        $this->firephp->fb('</table></fieldset>');
+        // $this->firephp->fb(" ");
+        // $this->firephp->fb('</table></fieldset>');
 
         // New columns
 
@@ -1268,7 +1268,7 @@
             if (is_array($v)) {
               $sync = "`$k` " . $v['Type'];
               $q->Q("ALTER TABLE `$q->PREFIX$table` ADD $sync");
-              $this->firephp->fb('New Column: ' . $q->mSql);
+              // $this->firephp->fb('New Column: ' . $q->mSql);
             }
           }
         }
@@ -1308,7 +1308,7 @@
             $q->Q("RENAME TABLE $table TO $q->PREFIX$columns");
           }
 
-          $this->firephp->fb('Renable Table: ' . $table . ' ' . $q->mSql);
+          // $this->firephp->fb('Renable Table: ' . $table . ' ' . $q->mSql);
         }
       }
     }
@@ -1500,7 +1500,7 @@
     // This should be used sparingly, and in production only!
     function _comment($msg, $clear = false)
     {
-      $this->firephp->fb($msg,'COMMENT',INFO);
+      // $this->firephp->fb($msg,'COMMENT',INFO);
       $time = round(microtime(true) - $this->_CFG['debug']['runtime'], 5);
       $echo = $this->_debugReport[] = ">'''[wiki:" . get_class($this) . "]''': ^[~~" . $time . "~~]^ $msg <br/>";
       if ($this->_CFG['debug']['on']) echo $echo;
@@ -1513,7 +1513,7 @@
 
       // code...
 
-      $this->firephp->fb($title);
+      // $this->firephp->fb($title);
       $this->_dump($var, $dump, $halt);
     }
 
@@ -1638,7 +1638,7 @@
       // return call_user_method_array($method,$x['class'],$args);
       // throw new Exception("This Method {$method} doesn't exist in ".get_class($this));
 
-      $this->firephp->fb("This Method {$method} doesn't exist in " . get_class($this));
+      // $this->firephp->fb("This Method {$method} doesn't exist in " . get_class($this));
     }
 
     public
