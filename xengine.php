@@ -377,7 +377,7 @@
       if ($Xtra != 'xIndex') {
         // $this->firephp->fb("Looking for Class $Xtra");
         $php = XPHP_DIR . "/$Xtra/$Xtra.php";
-        $this->firephp->fb("Looking for file $php");
+        // $this->firephp->fb("Looking for file $php");
         if (file_exists($php)) {
           $this->runXtra($Xtra, $php);
         }
