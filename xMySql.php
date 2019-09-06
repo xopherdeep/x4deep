@@ -54,7 +54,7 @@ if(!class_exists('xMySql')){
             		$this->mConn = $_SESSION['sql_conn'][$this->db['host']];	
             	} */
             	
-            	if(!$this->mConn = mysql_connect($this->db['host'], $this->db['user'], $pass))
+            	if(!$this->mConn = mysqli_connect($this->db['host'], $this->db['user'], $pass))
             		throw new Exception( mysql_error() );
 
             	$_SESSION['sql_conn'][$this->db['host']] = $this->mConn;	
