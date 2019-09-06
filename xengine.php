@@ -369,13 +369,13 @@
     private
     function walkPath()
     {
-      $this->firephp->fb("Xtra: " . $this->_SET['action'] . " | Method:" . $this->_SET['method']);
+      // $this->firephp->fb("Xtra: " . $this->_SET['action'] . " | Method:" . $this->_SET['method']);
 
       // Look to see if any Xtra matches
 
       $Xtra = 'x' . ucwords($this->_SET['action']);
       if ($Xtra != 'xIndex') {
-        $this->firephp->fb("Looking for Class $Xtra");
+        // $this->firephp->fb("Looking for Class $Xtra");
         $php = XPHP_DIR . "/$Xtra/$Xtra.php";
         $this->firephp->fb("Looking for file $php");
         if (file_exists($php)) {
@@ -423,7 +423,7 @@
         // $Xtra->Q = $this->Q;
         // call the function w/ params
 
-        $this->firephp->fb("Running $php");
+        // $this->firephp->fb("Running $php");
         array_values($this->_SET['params']);
         $return = call_user_func_array(array(
           $Xtra,
@@ -499,7 +499,7 @@
     private
     function browse()
     {
-      $this->firephp->fb("Sending data to Browser");
+      // $this->firephp->fb("Sending data to Browser");
 
       // Dislays/Outputs Data To Browser.
 
