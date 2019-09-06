@@ -55,7 +55,7 @@ if(!class_exists('xMySql')){
             	} */
             	
             	if(!$this->mConn = mysqli_connect($this->db['host'], $this->db['user'], $pass))
-            		throw new Exception( mysqli_error() );
+            		throw new Exception( mysqli_error($this->mConn) );
 
             	$_SESSION['sql_conn'][$this->db['host']] = $this->mConn;	
             	// Select DB if given
@@ -84,9 +84,9 @@ if(!class_exists('xMySql')){
     		switch($r){
     		// MySQL error
     			case(false):
-    				$this->error = mysqli_error();
+    				$this->error = mysqli_error($this->mConn);
                     $this->sql     = $sql;
-    				return false; //die(mysqli_error()."<br/>".$this->mSql);
+    				return false; //die(mysqli_error($this->mConn)."<br/>".$this->mSql);
     			break;
     			case($r === true):
     				$this->msg = "ran ".$sql;
