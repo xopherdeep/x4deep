@@ -72,13 +72,13 @@ if(!class_exists('xMySql')){
     		$this->mLimit = array('start' => $start,'limit' => $limit);
     	}
     	
-    	function DB($mysqli, $db){
-    		mysqli_select_db($mysqli, $db, $this->mConn);   
+    	function DB($db){
+    		mysqli_select_db($this->mConn, $db, $this->mConn);   
     	}
     	
     	function Q($sql){
     		$this->mSql 	= $sql;
-    		$r 				= mysqli_query($this->mSql,$this->mConn);
+    		$r 				= mysqli_query($this->mConn, $this->mSql,$this->mConn);
     		$this->errno 	= mysqli_errno($this->mConn);
     		
     		switch($r){
@@ -350,7 +350,7 @@ if(!class_exists('xMySql')){
 			if($tables == '*')
 			{
 				$tables = array();
-				$result = mysqli_query("SHOW TABLES LIKE '$this->PREFIX%';");
+				$result = mysqli_query($this->mConn, $this->mConn, "SHOW TABLES LIKE '$this->PREFIX%';");
 				while($row = mysqli_fetch_row($result))
 				{
 					$tables[] = $row[0];
@@ -368,14 +368,14 @@ if(!class_exists('xMySql')){
 			$return = '';
 			foreach($tables as $table)
 			{
-				$result = mysqli_query('SELECT * FROM '.$table);
+				$result = mysqli_query($this->mConn, $this->mConn, 'SELECT * FROM '.$table);
 				$num_fields = mysqli_num_fields($result);
 				
 				// used for import feature.
 				
 				
 				$return .= 'DROP TABLE '.$table.$semicolon;
-				$row2 = mysqli_fetch_row(mysqli_query('SHOW CREATE TABLE '.$table));
+				$row2 = mysqli_fetch_row(mysqli_query($this->mConn, $this->mConn, 'SHOW CREATE TABLE '.$table));
 				$return.= "\n\n".$row2[1]."$semicolon\n\n";
 				
 				for ($i = 0; $i < $num_fields; $i++) 
