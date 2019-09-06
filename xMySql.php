@@ -60,7 +60,7 @@ if(!class_exists('xMySql')){
             	$_SESSION['sql_conn'][$this->db['host']] = $this->mConn;	
             	// Select DB if given
                 if ($this->db['database'] != "")
-                   $this->DB( $this->mConn, $this->db['database'] );                   
+                   $this->DB( $this->db['database'] );                   
             }
             catch(Exception $e)
             {
@@ -73,7 +73,7 @@ if(!class_exists('xMySql')){
     	}
     	
     	function DB($db){
-    		mysqli_select_db($this->mConn, $db['database']);   
+    		mysqli_select_db($this->mConn, $db);   
     	}
     	
     	function Q($sql){
