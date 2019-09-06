@@ -270,7 +270,7 @@ if(!class_exists('xMySql')){
 	                }
 	            	
 	            	
-	            	$v = mysqli_real_escape_string($v);
+	            	$v = mysqli_real_escape_string($this->mConn, $v);
 	                
                     if(!is_numeric($v))
                          $v = ($o == "LIKE" || $o == "NOT LIKE") ? "'%$v%'" : "'$v'";    
@@ -310,7 +310,7 @@ if(!class_exists('xMySql')){
     		$values = null;
     		
     		foreach($columns as $k => $v){
-    			$v       = ($v != '') ? mysqli_real_escape_string($v) : '';
+    			$v       = ($v != '') ? mysqli_real_escape_string($this->mConn, $v) : '';
     			$keys    .= ($keys) ? ",`$k`" : "`$k`";
     			$values  .= ($values) ? ",'$v'" : "'$v'";
     		}
@@ -321,7 +321,7 @@ if(!class_exists('xMySql')){
     	function Update($table,$set_col,$needle){
     		$set = '';
             foreach($set_col as  $c => $v){
-                $v = mysqli_real_escape_string($v);
+                $v = mysqli_real_escape_string($this->mConn, $v);
                 $q = ($c == $v) ? "`$c` = $c+1" : "`$c` = '$v'";	
                 $set .= ($set) ? ", $q": $q;
             }
